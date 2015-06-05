@@ -26,7 +26,6 @@ function connectToServer() {
 
   socket.on('controlgrant', function(data) {
     hasControl = data.granted;
-    alert(hasControl);
   });
 
   socket.on('cameraUpdate', function(data) {
