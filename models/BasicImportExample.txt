@@ -1,0 +1,15 @@
+	// instantiate a loader
+	var loader = new THREE.JSONLoader();
+
+	// load a resource
+	loader.load(
+		// resource URL
+		'fence/fence.js',
+		// Function when resource is loaded
+		function ( geometry, materials ) {
+			var material = new THREE.MeshFaceMaterial( materials );
+			console.log(material.name);
+			var object = new THREE.Mesh( geometry, material );
+			scene.add( object );
+		}
+	);
