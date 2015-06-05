@@ -3,6 +3,7 @@ window.addEventListener('resize', onWindowResize, false);
 var camera, scene, renderer;
 var cameraControls, effectController;
 var clock = new THREE.Clock();
+var previousCameraData = {init: true};
 
 function updateCamera() {
     var position_x = camera.position.x;
@@ -21,7 +22,18 @@ function updateCamera() {
         target_z: target_z
     };
 
-    sendUpdatedCameraInformation(cameraData);
+    if (previousCameraData.init
+      || previousCameraData.position_x !== cameraData.position_x
+      || previousCameraData.position_y !== cameraData.position_y
+      || previousCameraData.position_z !== cameraData.position_z
+      || previousCameraData.target_x !== cameraData.target_x
+      || previousCameraData.target_y !== cameraData.target_y
+      || previousCameraData.target_z !== cameraData.target_z)
+    {
+      sendUpdatedCameraInformation(cameraData);
+    }
+
+    previousCameraData = cameraData;
 }
 
 function onCameraUpdate(cameraData) {
