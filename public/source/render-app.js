@@ -1,11 +1,10 @@
-window.addEventListener('resize', onWindowResize, false);
-
 var camera, scene, renderer;
 var cameraControls, effectController;
 var clock = new THREE.Clock();
 var previousCameraData = {init: true};
+var mouse = new THREE.Vector2();
 
-function updateCamera() {
+function updateCamera() { 
     var position_x = camera.position.x;
     var position_y = camera.position.y;
     var position_z = camera.position.z;
@@ -55,6 +54,34 @@ function onWindowResize() {
   camera.updateProjectionMatrix();
 }
 
+function onMouseMove( event ) {
+
+	// calculate mouse position in normalized device coordinates
+	// (-1 to +1) for both components
+
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;		
+
+} 
+
+function onDocumentMouseDown( event ) {
+	//var projector = new THREE.Projector();
+	var raycaster = new THREE.Raycaster();
+	// update the picking ray with the camera and mouse position
+	//var ray = projector.pickingRay( mouse, camera );
+	raycaster.setFromCamera( mouse, camera );	
+
+	// calculate objects intersecting the picking ray
+	var intersects = raycaster.intersectObjects( scene.children,true);
+
+	for ( var i = 0; i < intersects.length; i++ ) {
+		intersects[ i ].object.material.color.set( 0xff0000 );
+	}
+	
+	//renderer.render( scene, camera );
+
+}
+
 function init() {
   var canvasWidth = window.innerWidth * .75;
   var canvasHeight = window.innerHeight - $('#jsviewport').offset().top;
@@ -64,22 +91,21 @@ function init() {
   renderer = new THREE.WebGLRenderer({
     antialias: true
   });
-  renderer.gammaInput = true;
-  renderer.gammaOutput = true;
+  //renderer.gammaInput = true;
+  //renderer.gammaOutput = true;
   renderer.setSize(canvasWidth, canvasHeight);
-  renderer.setClearColorHex(0x888888, 1.0);
-
+  renderer.setClearColor(0x888888, 1.0);
   // CAMERA
   camera = new THREE.PerspectiveCamera(45, canvasRatio, 1, 40000);
-
   // CONTROLS
-  cameraControls = new THREE.OrbitAndPanControls(camera, renderer.domElement);
-
+  cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
   camera.position.set(-480, 659, -619);
   cameraControls.target.set(4, 301, 92);
 
   // SCENE
   fillScene();
+  addToDOM();
+  render();
 }
 
 function fillScene() {
@@ -97,10 +123,24 @@ function fillScene() {
   scene.add(ambientLight);
   scene.add(light);
   scene.add(light2);
-  Coordinates.drawGround({
+  
+  /*Coordinates.drawGround({
     size: 1000
-  });
-  createSnowman(0, 0, 0);
+  });*/
+	// instantiate a loader
+	var loader = new THREE.JSONLoader();
+
+		// load a resource
+		loader.load(
+		// resource URL
+		'public/models/smallcity/small.js',
+		// Function when resource is loaded
+		function ( geometry, materials ) {
+			var material = new THREE.MeshFaceMaterial( materials );
+			var object = new THREE.Mesh( geometry, material );
+			scene.add( object );
+	}
+);
 }
 
 function addToDOM() {
@@ -110,14 +150,18 @@ function addToDOM() {
     container.removeChild(canvas[0]);
   }
   container.appendChild(renderer.domElement);
+  document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+  document.addEventListener( 'mousemove', onMouseMove, false );
+  window.addEventListener('resize', onWindowResize, false);
 }
 
 function animate() {
-  window.requestAnimationFrame(animate);
+  requestAnimationFrame(animate);
   render();
 }
 
 function render() {
+  requestAnimationFrame(render);
   var delta = clock.getDelta();
   cameraControls.enabled = hasControl;
   cameraControls.update(delta);
@@ -128,10 +172,11 @@ function render() {
 function startRenderApp() {
   try {
     init();
-    addToDOM();
-    animate();
+
   } catch (e) {
     var errorReport = "Your program encountered an unrecoverable error, can not draw on canvas. Error was:<br/><br/>";
     $('#container').append(errorReport + e);
   }
 }
+
+
