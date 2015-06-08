@@ -21,15 +21,15 @@ function connectToServer() {
     $('#users').empty();
     $.each(users, function(username, value) {
       if (username === activeUserName) {
-        $('#users').append('<div><u>' + username + '</u></div>');
+        $('#users').append('<div><b><u>' + username + '</u></b></div>');
       } else {
         $('#users').append('<div>' + username + '</div>');
       }
     });
   });
 
-  socket.on('controlgrant', function(data) {
-    hasControl = data.granted;
+  socket.on('controlgrant', function(username) {
+    hasControl = (name === username);
   });
 
   socket.on('cameraUpdate', function(data) {
@@ -37,6 +37,8 @@ function connectToServer() {
   });
 
   socket.on('servernotification', function(message) {});
+
+  socket.on('requestCamera', function() {sendUpdatedCameraInformation(getCameraData())});
 }
 
 function requestName() {

@@ -4,22 +4,29 @@ var clock = new THREE.Clock();
 var previousCameraData = {init: true};
 var mouse = new THREE.Vector2();
 
-function updateCamera() { 
-    var position_x = camera.position.x;
-    var position_y = camera.position.y;
-    var position_z = camera.position.z;
-    var target_x = cameraControls.target.x;
-    var target_y = cameraControls.target.y;
-    var target_z = cameraControls.target.z;
+function getCameraData()
+{
+  var position_x = camera.position.x;
+  var position_y = camera.position.y;
+  var position_z = camera.position.z;
+  var target_x = cameraControls.target.x;
+  var target_y = cameraControls.target.y;
+  var target_z = cameraControls.target.z;
 
-    var cameraData = {
-        position_x: position_x,
-        position_y: position_y,
-        position_z: position_z,
-        target_x: target_x,
-        target_y: target_y,
-        target_z: target_z
-    };
+  var cameraData = {
+      position_x: position_x,
+      position_y: position_y,
+      position_z: position_z,
+      target_x: target_x,
+      target_y: target_y,
+      target_z: target_z
+  };
+
+  return cameraData;
+}
+
+function updateCamera() {
+    var cameraData = getCameraData();
 
     if (previousCameraData.init
       || previousCameraData.position_x !== cameraData.position_x
@@ -60,16 +67,16 @@ function onMouseMove( event ) {
 	// (-1 to +1) for both components
 
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;		
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-} 
+}
 
 function onDocumentMouseDown( event ) {
 	//var projector = new THREE.Projector();
 	var raycaster = new THREE.Raycaster();
 	// update the picking ray with the camera and mouse position
 	//var ray = projector.pickingRay( mouse, camera );
-	raycaster.setFromCamera( mouse, camera );	
+	raycaster.setFromCamera( mouse, camera );
 
 	// calculate objects intersecting the picking ray
 	var intersects = raycaster.intersectObjects( scene.children,true);
@@ -77,7 +84,7 @@ function onDocumentMouseDown( event ) {
 	for ( var i = 0; i < intersects.length; i++ ) {
 		intersects[ i ].object.material.color.set( 0xff0000 );
 	}
-	
+
 	//renderer.render( scene, camera );
 
 }
@@ -123,7 +130,7 @@ function fillScene() {
   scene.add(ambientLight);
   scene.add(light);
   scene.add(light2);
-  
+
   /*Coordinates.drawGround({
     size: 1000
   });*/
@@ -178,5 +185,3 @@ function startRenderApp() {
     $('#container').append(errorReport + e);
   }
 }
-
-
