@@ -3,8 +3,15 @@ var _ = require('underscore');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
+var fs = require('fs');
+
+eval(fs.readFileSync('Queue.js').toString());
+
 var nodes = { };
-var usernames = {};
+var usernames = { };
+var users = { };
+var sockets = { };
+var userQueue = new Queue();
 var activeUserName;
 server.listen(process.env.PORT || 8080);
 
@@ -33,9 +40,21 @@ function revokeControl(socket)
   socket.broadcast.emit('servernotification', message);
 }
 
+function changeControl(fromSocket, toSocket)
+{
+  var message = { from: fromSocket.username, to: toSocket.username };
+  io.sockets.emit('controlchange', message, usernames);
+}
+
+function userListChanged()
+{
+  io.sockets.emit('updateusers', usernames, activeUserName);
+}
+
 io.sockets.on('connection', function(socket) {
 	socket.on('adduser', function(username) {
 		socket.username = username;
+    sockets[username] = socket;
 		usernames[username] = username;
 
     if (Object.keys(usernames).length == 1)
@@ -44,7 +63,7 @@ io.sockets.on('connection', function(socket) {
       grantControl(socket);
     }
 
-		io.sockets.emit('updateusers', usernames);
+    userListChanged();
 	});
 
 	socket.on('relinquishControl', function(){
@@ -66,6 +85,6 @@ io.sockets.on('connection', function(socket) {
 	socket.on('disconnect', function(){
 		delete usernames[socket.username];
 
-		io.sockets.emit('updateusers', usernames);
+    userListChanged();
 	});
 });

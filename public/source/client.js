@@ -17,10 +17,14 @@ function connectToServer() {
     socket.emit('adduser', name);
   });
 
-  socket.on('updateusers', function(data) {
+  socket.on('updateusers', function(users, activeUserName) {
     $('#users').empty();
-    $.each(data, function(key, value) {
-      $('#users').append('<div>' + key + '</div>');
+    $.each(users, function(username, value) {
+      if (username === activeUserName) {
+        $('#users').append('<div><u>' + username + '</u></div>');
+      } else {
+        $('#users').append('<div>' + username + '</div>');
+      }
     });
   });
 
@@ -49,14 +53,13 @@ function requestName() {
   }
 }
 
-function sendUpdatedCameraInformation(cameraData)
-{
+function sendUpdatedCameraInformation(cameraData) {
   socket.emit('cameraUpdate', cameraData);
 }
 
 function relinquishControls() {
-    hasControl = false;
-    socket.emit('relinquishControl');
+  hasControl = false;
+  socket.emit('relinquishControl');
 }
 
 function requestControls() {
