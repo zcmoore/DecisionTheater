@@ -70,18 +70,3 @@ function requestName() {
 function sendUpdatedCameraInformation(cameraData) {
   socket.emit('cameraUpdate', cameraData);
 }
-
-function relinquishControls() {
-  hasControl = false;
-  socket.emit('relinquishControl');
-}
-
-function requestControls() {
-  /*
-    var message = {
-        type: "requestControl"
-    };
-    var jsonMessage = JSON.stringify(message);
-    socket.send(jsonMessage);
-    */
-}

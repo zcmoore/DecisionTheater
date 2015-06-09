@@ -51,14 +51,6 @@ io.sockets.on('connection', function(socket) {
     io.sockets.emit('requestCamera');
   });
 
-  socket.on('relinquishControl', function() {
-    if (socket.username === activeUserName) {
-      activeUserName = null;
-      // TODO: reassign control
-      grantControl({username: null});
-    }
-  });
-
   socket.on('transferControl', function(targetUsername) {
     if (socket.username === activeUserName
       && usernames[targetUsername] !== null
