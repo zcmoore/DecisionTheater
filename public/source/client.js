@@ -4,8 +4,7 @@ var hasControl;
 
 function startClient() {
   hasControl = false;
-  if (requestName())
-  {
+  if (requestName()) {
     connectToServer();
     $("#notifications").append('Logged in as <b><u>' + name + '</u></b>');
   }
@@ -28,6 +27,13 @@ function connectToServer() {
         $('#users').append('<div>' + username + '</div>');
       }
     });
+
+    // Add double click listeners
+    $.each($("#users").children(), (function(index, userEntry) {
+      userEntry.addEventListener("dblclick", function() {
+        socket.emit('transferControl', $(this).html());
+      });
+    }));
   });
 
   socket.on('controlgrant', function(username) {
@@ -40,7 +46,9 @@ function connectToServer() {
 
   socket.on('servernotification', function(message) {});
 
-  socket.on('requestCamera', function() {sendUpdatedCameraInformation(getCameraData())});
+  socket.on('requestCamera', function() {
+    sendUpdatedCameraInformation(getCameraData())
+  });
 }
 
 function requestName() {

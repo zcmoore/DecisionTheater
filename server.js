@@ -9,7 +9,6 @@ eval(fs.readFileSync('Queue.js').toString());
 
 var nodes = {};
 var usernames = {};
-var users = {};
 var activeSocket = null;
 var userQueue = new Queue();
 var activeUserName;
@@ -61,7 +60,9 @@ io.sockets.on('connection', function(socket) {
   });
 
   socket.on('transferControl', function(targetUsername) {
-    if (socket.username === activeUserName) {
+    if (socket.username === activeUserName
+      && usernames[targetUsername] !== null
+      && usernames[targetUsername] !== undefined) {
       grantControl( {username: targetUsername} );
     }
   });
