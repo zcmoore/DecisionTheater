@@ -10,7 +10,7 @@ eval(fs.readFileSync('Queue.js').toString());
 var nodes = {};
 var usernames = {};
 var activeSocket = null;
-var userQueue = new Queue();
+var userQueue = [];
 var activeUserName;
 server.listen(process.env.PORT || 8080);
 
@@ -39,6 +39,8 @@ function userListChanged() {
 
 io.sockets.on('connection', function(socket) {
   socket.on('adduser', function(username) {
+    // TODO: handle "user already exists"
+    userQueue.push(username);
     socket.username = username;
     usernames[username] = username;
 
@@ -54,7 +56,8 @@ io.sockets.on('connection', function(socket) {
   socket.on('transferControl', function(targetUsername) {
     if (socket.username === activeUserName
       && usernames[targetUsername] !== null
-      && usernames[targetUsername] !== undefined) {
+      && usernames[targetUsername] !== undefined
+      && userQueue.indexOf(targetUsername) >= 0) {
       grantControl( {username: targetUsername} );
     }
   });
@@ -68,7 +71,11 @@ io.sockets.on('connection', function(socket) {
 
   socket.on('disconnect', function() {
     delete usernames[socket.username];
-
+    var index = userQueue.indexOf(socket.username);
+    if (index >= 0) {
+      userQueue.splice(index, 1);
+    }
+    grantControl({username: userQueue[0]});
     userListChanged();
   });
 });
