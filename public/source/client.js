@@ -4,9 +4,11 @@ var hasControl;
 
 function startClient() {
   hasControl = false;
-  requestName();
-  connectToServer();
-  $("#notifications").append('Logged in as <b><u>' + name + '</u></b>');
+  if (requestName())
+  {
+    connectToServer();
+    $("#notifications").append('Logged in as <b><u>' + name + '</u></b>');
+  }
 }
 
 function connectToServer() {
@@ -45,13 +47,15 @@ function requestName() {
   name = window.prompt("Please enter your name", "");
   if (name.trim().length === 0) {
     alert("Name required");
-    requestName();
+    return requestName();
   } else if (name === null || name == "null") {
     $('#invalidLogin').show();
     $('#validLogin').hide();
+    return false;
   } else {
     $('#validLogin').show();
     $('#invalidLogin').hide();
+    return true;
   }
 }
 
