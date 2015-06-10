@@ -44,8 +44,6 @@ function connectToServer() {
     onCameraUpdate(data);
   });
 
-  socket.on('servernotification', function(message) {});
-
   socket.on('requestCamera', function() {
     sendUpdatedCameraInformation(getCameraData())
   });
