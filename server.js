@@ -34,20 +34,32 @@ function userListChanged() {
   io.sockets.emit('updateusers', usernames, activeUserName);
 }
 
+/** Returns true if there is a user with the given username, or false otherwise */
+function isUserConnected(username) {
+  var index = userQueue.indexOf(username);
+  if (index >= 0) return true;
+  else return false;
+}
+
 io.sockets.on('connection', function(socket) {
   socket.on('adduser', function(username) {
-    // TODO: handle "user already exists"
-    userQueue.push(username);
-    socket.username = username;
-    usernames[username] = username;
-
-    if (Object.keys(usernames).length == 1) {
-      activeUserName = username;
-      grantControl(socket);
+    if (isUserConnected(username)) {
+      socket.emit('serverResponse', { request: "adduser", success: false, reason: "username is in use" });
+      //socket.disconnect();
     }
+    else {
+      userQueue.push(username);
+      socket.username = username;
+      usernames[username] = username;
 
-    userListChanged();
-    io.sockets.emit('requestCamera');
+      if (Object.keys(usernames).length == 1) {
+        activeUserName = username;
+        grantControl(socket);
+      }
+
+      userListChanged();
+      io.sockets.emit('requestCamera');
+    }
   });
 
   socket.on('transferControl', function(targetUsername) {
