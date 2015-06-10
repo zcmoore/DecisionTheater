@@ -3,6 +3,11 @@ var cameraControls, effectController;
 var clock = new THREE.Clock();
 var previousCameraData = {init: true};
 var mouse = new THREE.Vector2();
+var canvasWidth;
+var canvasHeight;
+var loader;
+var city;
+var mouseMoved = true;
 
 function updateCamera() { 
     var position_x = camera.position.x;
@@ -45,8 +50,8 @@ function onCameraUpdate(cameraData) {
 }
 
 function onWindowResize() {
-  var canvasWidth = window.innerWidth * .75;
-  var canvasHeight = window.innerHeight - $('#jsviewport').offset().top;
+  canvasWidth = window.innerWidth * .75;
+  canvasHeight = window.innerHeight - $('#jsviewport').offset().top;
 
   renderer.setSize(canvasWidth, canvasHeight);
 
@@ -56,30 +61,64 @@ function onWindowResize() {
 
 function onMouseMove( event ) {
 
+	mouseMoved = true;
 	// calculate mouse position in normalized device coordinates
 	// (-1 to +1) for both components
-
-	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;		
+	var x = event.clientX;
+	var y = event.clientY;
+	var xAdjust = $('#jsviewport').offset().left;
+	var yAdjust = $('#jsviewport').offset().top;
+	//console.log("x " + x + "y " + y + "xa " + xAdjust + "yA " + yAdjust );
+	
+	var newX = x-xAdjust;
+	var newY = y-yAdjust;
+	//console.log("New " + newX + " y is " + newY + " canvasWidth " + canvasWidth + " y is " + canvasHeight );
+	mouse.x = ( newX / canvasWidth ) * 2 - 1;
+	mouse.y = - ( newY / canvasHeight ) * 2 + 1;		
+	//console.log("Mouse " + mouse.x  + " y is " + mouse.y );
 
 } 
 
 function onDocumentMouseDown( event ) {
-	//var projector = new THREE.Projector();
-	var raycaster = new THREE.Raycaster();
-	// update the picking ray with the camera and mouse position
-	//var ray = projector.pickingRay( mouse, camera );
-	raycaster.setFromCamera( mouse, camera );	
 
-	// calculate objects intersecting the picking ray
-	var intersects = raycaster.intersectObjects( scene.children,true);
-
-	for ( var i = 0; i < intersects.length; i++ ) {
-		intersects[ i ].object.material.color.set( 0xff0000 );
+	if (event.button == 0){
+		mouseMoved = false;
 	}
-	
-	//renderer.render( scene, camera );
+}
 
+function onDocumentMouseUp( event ) {
+	if (mouse.x <= 1 && mouse.x >=-1 && mouse.y <= 1 && mouse.y >=-1 && event.button == 0 && mouseMoved == false){
+		var raycaster = new THREE.Raycaster();
+		raycaster.setFromCamera( mouse, camera );	
+
+		var intersects = raycaster.intersectObject(city);
+
+		if (intersects.length > 0){
+			var pos = intersects[0].point;
+			console.log("intersected at x: " + pos.x + " y: " + pos.y + " z: " + pos.z );
+			loader.load(
+			'public/models/streetlamp/sl.js',
+			
+			function ( geometry, materials ) {
+				console.log("should add another?");
+				var material = new THREE.MeshFaceMaterial( materials );
+				var lamp = new THREE.Mesh( geometry, material );
+				scene.add(lamp);
+				lamp.position.setX(pos.x);
+				lamp.position.setY(pos.y);
+				lamp.position.setZ(pos.z);
+				console.log("lamp position x: " + lamp.position.x + "," + lamp.position.y + "," + lamp.position.z + ",");
+			}
+			)
+			var geometry = new THREE.SphereGeometry( 5, 32, 32 );
+			var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+			var sphere = new THREE.Mesh( geometry, material );
+			scene.add( sphere );
+			sphere.position.setX(pos.x);
+			sphere.position.setY(pos.y);
+			sphere.position.setZ(pos.z);
+		}
+	}
 }
 
 function init() {
@@ -91,8 +130,8 @@ function init() {
   renderer = new THREE.WebGLRenderer({
     antialias: true
   });
-  //renderer.gammaInput = true;
-  //renderer.gammaOutput = true;
+  renderer.gammaInput = true;
+  renderer.gammaOutput = true;
   renderer.setSize(canvasWidth, canvasHeight);
   renderer.setClearColor(0x888888, 1.0);
   // CAMERA
@@ -128,17 +167,17 @@ function fillScene() {
     size: 1000
   });*/
 	// instantiate a loader
-	var loader = new THREE.JSONLoader();
+	loader = new THREE.JSONLoader();
 
 		// load a resource
 		loader.load(
 		// resource URL
-		'public/models/smallcity/small.js',
+		'public/models/tricity/tricity.js',
 		// Function when resource is loaded
 		function ( geometry, materials ) {
 			var material = new THREE.MeshFaceMaterial( materials );
-			var object = new THREE.Mesh( geometry, material );
-			scene.add( object );
+			city = new THREE.Mesh( geometry, material );
+			scene.add( city );
 	}
 );
 }
@@ -151,6 +190,7 @@ function addToDOM() {
   }
   container.appendChild(renderer.domElement);
   document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+  document.addEventListener( 'mouseup', onDocumentMouseUp, false );
   document.addEventListener( 'mousemove', onMouseMove, false );
   window.addEventListener('resize', onWindowResize, false);
 }
