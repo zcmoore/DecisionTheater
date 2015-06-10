@@ -6,6 +6,7 @@ function startClient() {
   hasControl = false;
   if (requestName()) {
     connectToServer();
+    $("#notifications").empty();
     $("#notifications").append('Logged in as <b><u>' + name + '</u></b>');
   }
 }
@@ -45,7 +46,19 @@ function connectToServer() {
   });
 
   socket.on('requestCamera', function() {
-    sendUpdatedCameraInformation(getCameraData())
+    sendUpdatedCameraInformation(getCameraData());
+  });
+
+  socket.on('serverResponse', function(response) {
+    // if server rejected login
+    if (!response.success && response.request == "adduser") {
+      alert(response.reason);
+      window.location.reload(true);
+    }
+    // if server accepted any request
+    else {
+      // DO NOTHING
+    }
   });
 }
 
