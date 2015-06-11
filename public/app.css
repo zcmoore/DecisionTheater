@@ -32,3 +32,22 @@ body {
   word-wrap: break-word;
   /* Internet Explorer 5.5+ */
 }
+.middlealign {
+  text-align: center;
+  position: relative;
+  padding-top: 50%;
+  transform: translateY(-50%);
+  /* css-3 */
+  -webkit-transform: translateY(-50%);
+  /* Chrome 36+ */
+  -o-transform: translateY(-50%);
+  /* Opera 10.5-23 */
+  -webkit-transform: translateY(-50%);
+  /* Opera 23+ */
+  -webkit-transform: translateY(-50%);
+  /* Safari 3.1+ */
+  -ms-transform: translateY(-50%);
+  /* Internet Explorer 9.0+ */
+  -moz-transform: translateY(-50%);
+  /* Firefox 3.5+ */
+}
