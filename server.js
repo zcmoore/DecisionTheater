@@ -4,12 +4,19 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 
+// All camera updates received by the server in timeframes of this length will be chained together into a single message
+var cameraChainTime = 500;
+
 var nodes = {};
 var usernames = {};
 var activeSocket = null;
 var userQueue = [];
 var activeUserName;
 var objectList=[];
+
+var messageList = [];
+var lastCameraMessage = null;
+
 server.listen(process.env.PORT || 8080);
 
 app.set('view engine', 'ejs');
@@ -90,8 +97,24 @@ io.sockets.on('connection', function(socket) {
 
   socket.on('cameraUpdate', function(cameraData) {
     if (socket.username === activeUserName) {
-      currentCamera = cameraData;
       socket.broadcast.emit('cameraUpdate', cameraData);
+      var currentTime = new Date().getTime();
+      cameraData.updateType = 'cameraUpdate';
+      cameraData.updateStart = currentTime;
+      cameraData.updateEnd = currentTime;
+
+      if (lastCameraMessage == null) {
+        lastCameraMessage = cameraData;
+      }
+      else if (lastCameraMessage.updateStart + 500 > cameraData.updateStart) {
+        // chain the updates
+        cameraData.updateStart = lastCameraMessage.updateStart;
+        lastCameraMessage = cameraData;
+      }
+      else {
+        messageList.push(lastCameraMessage);
+        lastCameraMessage = cameraData;
+      }
     }
   });
 
