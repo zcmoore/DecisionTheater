@@ -89,70 +89,75 @@ function onWindowResize() {
 }
 
 function onMouseMove( event ) {
-
-	mouseMoved = true;
-	// calculate mouse position in normalized device coordinates
-	// (-1 to +1) for both components
-	var oldX = mouseX;
-	var oldY = mouseY;
-	mouseX = event.clientX;
-	mouseY = event.clientY;
-	if (oldX != mouseX && oldY != mouseY){
-		var xAdjust = $('#jsviewport').offset().left;
-		var yAdjust = $('#jsviewport').offset().top;
-		
-		var newX = mouseX-xAdjust;
-		var newY = mouseY-yAdjust;
-		
-		mouse.x = ( newX / canvasWidth ) * 2 - 1;
-		mouse.y = - ( newY / canvasHeight ) * 2 + 1;
-		mouseMoved = true;	
+	if (hasControl){
+		mouseMoved = true;
+		// calculate mouse position in normalized device coordinates
+		// (-1 to +1) for both components
+		var oldX = mouseX;
+		var oldY = mouseY;
+		mouseX = event.clientX;
+		mouseY = event.clientY;
+		if (oldX != mouseX && oldY != mouseY){
+			var xAdjust = $('#jsviewport').offset().left;
+			var yAdjust = $('#jsviewport').offset().top;
+			
+			var newX = mouseX-xAdjust;
+			var newY = mouseY-yAdjust;
+			
+			mouse.x = ( newX / canvasWidth ) * 2 - 1;
+			mouse.y = - ( newY / canvasHeight ) * 2 + 1;
+			mouseMoved = true;	
+		}
 	}
 
 }
 
 function onDocumentMouseDown( event ) {
-	mouseMoved = false;
+	if (hasControl){
+		mouseMoved = false;
+	}
 }
 
 function onDocumentMouseUp( event ) {
-	if (mouse.x <= 1 && mouse.x >=-1 && mouse.y <= 1 && mouse.y >=-1 && event.button == 0 && mouseMoved == false){
-		var raycaster = new THREE.Raycaster();
-		raycaster.setFromCamera( mouse, camera );	
+	if (hasControl){
+		if (mouse.x <= 1 && mouse.x >=-1 && mouse.y <= 1 && mouse.y >=-1 && event.button == 0 && mouseMoved == false){
+			var raycaster = new THREE.Raycaster();
+			raycaster.setFromCamera( mouse, camera );	
 
-		var intersects = raycaster.intersectObject(city);
+			var intersects = raycaster.intersectObject(city);
 
-		if (intersects.length > 0){
-			var pos = intersects[0].point;
-			//console.log("intersected at x: " + pos.x + " y: " + pos.y + " z: " + pos.z );
-			loader.load(
-			'public/models/streetlamp/sl.js',
-			
-			function ( geometry, materials ) {
-				var material = new THREE.MeshFaceMaterial( materials );
-				var lamp = new THREE.Mesh( geometry, material );
-				scene.add(lamp);
-				lamp.position.setX(pos.x);
-				lamp.position.setY(pos.y);
-				lamp.position.setZ(pos.z);
-				//console.log("lamp position x: " + lamp.position.x + "," + lamp.position.y + "," + lamp.position.z + ",");
+			if (intersects.length > 0){
+				var pos = intersects[0].point;
+				//console.log("intersected at x: " + pos.x + " y: " + pos.y + " z: " + pos.z );
+				loader.load(
+				'public/models/streetlamp/sl.js',
+				
+				function ( geometry, materials ) {
+					var material = new THREE.MeshFaceMaterial( materials );
+					var lamp = new THREE.Mesh( geometry, material );
+					scene.add(lamp);
+					lamp.position.setX(pos.x);
+					lamp.position.setY(pos.y);
+					lamp.position.setZ(pos.z);
+					//console.log("lamp position x: " + lamp.position.x + "," + lamp.position.y + "," + lamp.position.z + ",");
+				}
+				)
+				var objectData = {
+					pos_x: pos.x,
+					pos_y: pos.y,
+					pos_z: pos.z
+				};
+				
+				sendObjectCreation(objectData);
+				
+				var geometry = new THREE.SphereGeometry( 5, 32, 32 );
+				var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+				var sphere = new THREE.Mesh( geometry, material );
+				scene.add( sphere );
+				sphere.position.setX(pos.x);
+				sphere.position.setY(pos.y);
+				sphere.position.setZ(pos.z);
 			}
-			)
-			var objectData = {
-				pos_x: pos.x,
-				pos_y: pos.y,
-				pos_z: pos.z
-			};
-			
-			sendObjectCreation(objectData);
-			
-			var geometry = new THREE.SphereGeometry( 5, 32, 32 );
-			var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-			var sphere = new THREE.Mesh( geometry, material );
-			scene.add( sphere );
-			sphere.position.setX(pos.x);
-			sphere.position.setY(pos.y);
-			sphere.position.setZ(pos.z);
 		}
 	}
 }
