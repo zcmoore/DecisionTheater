@@ -49,6 +49,21 @@ function onCameraUpdate(cameraData) {
   cameraControls.target.z = cameraData.target_z;
 }
 
+function onObjectCreate(objectData) {
+	loader.load(
+	'public/models/streetlamp/sl.js',
+	
+	function ( geometry, materials ) {
+		var material = new THREE.MeshFaceMaterial( materials );
+		var lamp = new THREE.Mesh( geometry, material );
+		scene.add(lamp);
+		lamp.position.setX(objectData.pos_x);
+		lamp.position.setY(objectData.pos_y);
+		lamp.position.setZ(objectData.pos_z);
+	}
+	)
+}
+
 function onWindowResize() {
   canvasWidth = window.innerWidth * .75;
   canvasHeight = window.innerHeight - $('#jsviewport').offset().top;
@@ -100,7 +115,6 @@ function onDocumentMouseUp( event ) {
 			'public/models/streetlamp/sl.js',
 			
 			function ( geometry, materials ) {
-				console.log("should add another?");
 				var material = new THREE.MeshFaceMaterial( materials );
 				var lamp = new THREE.Mesh( geometry, material );
 				scene.add(lamp);
@@ -110,6 +124,14 @@ function onDocumentMouseUp( event ) {
 				console.log("lamp position x: " + lamp.position.x + "," + lamp.position.y + "," + lamp.position.z + ",");
 			}
 			)
+			var objectData = {
+				pos_x: pos.x,
+				pos_y: pos.y,
+				pos_z: pos.z
+			};
+			
+			sendObjectCreation(objectData);
+			
 			var geometry = new THREE.SphereGeometry( 5, 32, 32 );
 			var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 			var sphere = new THREE.Mesh( geometry, material );
@@ -172,7 +194,7 @@ function fillScene() {
 		// load a resource
 		loader.load(
 		// resource URL
-		'public/models/tricity/tricity.js',
+		'public/models/smallcity/small.js',
 		// Function when resource is loaded
 		function ( geometry, materials ) {
 			var material = new THREE.MeshFaceMaterial( materials );

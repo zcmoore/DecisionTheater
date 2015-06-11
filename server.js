@@ -62,6 +62,13 @@ io.sockets.on('connection', function(socket) {
       socket.broadcast.emit('cameraUpdate', cameraData);
     }
 	});
+	
+	socket.on('objectCreated', function(objectData){
+    if (socket.username === activeUserName)
+    {
+      socket.broadcast.emit('objectCreated', objectData);
+    }
+	});
 
 	socket.on('disconnect', function(){
 		delete usernames[socket.username];

@@ -31,6 +31,10 @@ function connectToServer() {
   socket.on('cameraUpdate', function(data) {
     onCameraUpdate(data);
   });
+  
+  socket.on('objectCreated', function(data) {
+    onObjectCreate(data);
+  });
 
   socket.on('servernotification', function(message) {});
 }
@@ -52,6 +56,10 @@ function requestName() {
 function sendUpdatedCameraInformation(cameraData)
 {
   socket.emit('cameraUpdate', cameraData);
+}
+
+function sendObjectCreation(object){
+  socket.emit('objectCreated',object);
 }
 
 function relinquishControls() {
