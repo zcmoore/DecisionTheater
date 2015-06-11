@@ -6,6 +6,7 @@ var io = require('socket.io').listen(server);
 var nodes = { };
 var usernames = {};
 var activeUserName;
+var objectList=[];
 server.listen(process.env.PORT || 8080);
 
 app.set('view engine', 'ejs');
@@ -66,6 +67,7 @@ io.sockets.on('connection', function(socket) {
 	socket.on('objectCreated', function(objectData){
     if (socket.username === activeUserName)
     {
+	  objectList.push(objectData);
       socket.broadcast.emit('objectCreated', objectData);
     }
 	});
