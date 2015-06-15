@@ -4,7 +4,7 @@
   <title>Decision Theatre</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+  <script src="../../socket.io/socket.io.js"></script>
   <link rel="stylesheet" href="../public/lib/bootstrap.css" />
   <link rel="stylesheet" href="../public/app.css" />
 
@@ -22,7 +22,7 @@
   <script type="text/javascript" src="../public/lib/Detector.js"></script>
 
   <script type="text/javascript" src="../public/source/client.js"></script>
-  <script type="text/javascript" src="/public/source/render-app.js"></script>
+  <script type="text/javascript" src="../public/source/render-app.js"></script>
 </head>
 
 <body>
@@ -68,8 +68,10 @@
     <p>Name required to enter Decision Theatre</p>
   </div>
   <!-- /Invalid Login Panel  -->
-
+  
   <script>
+
+  $(document).ready(function(){ 
     $('#validLogin').hide();
     $('#invalidLogin').hide();
 
@@ -77,6 +79,7 @@
     startClient();
 
     onWindowResize();
+	});
   </script>
 </body>
 

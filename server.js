@@ -12,7 +12,7 @@ var usernames = {};
 var activeSocket = null;
 var userQueue = [];
 var activeUserName;
-var objectList=[];
+var objectList;
 
 var messageList = [];
 var lastCameraMessage = null;
@@ -83,17 +83,24 @@ io.sockets.on('connection', function(socket) {
   socket.on('objectCreated', function(objectData){
     if (socket.username === activeUserName)
     {
-	  objectList.push(objectData);
+      createObject(objectData);
       socket.broadcast.emit('objectCreated', objectData);
     }
   });
 
-  /*socket.on('requestObjects'){
+  socket.on('requestObjects', function(){
     if (socket.username === activeUserName)
     {
       socket.broadcast.emit('requestObjects', objectList);
     }
-  });*/
+  });
+  socket.on('deleteObject', function(objectID){
+      if (socket.username === activeUserName)
+      {
+          var deleted = deleteObject(objectID);
+          socket.broadcast.emit('objectDeleted', deleted);
+      }
+  });
 
   socket.on('cameraUpdate', function(cameraData) {
     if (socket.username === activeUserName) {
@@ -128,3 +135,18 @@ io.sockets.on('connection', function(socket) {
     userListChanged();
   });
 });
+
+function createObject(objectData) {
+    var date = new Date();
+    objectList[date.getTime] = objectData;
+}
+
+function deleteObject(objectID) {
+    if (objectID in objectList) {
+        delete objectList[objectID];
+        return true;
+    } else {
+        return false;
+    }
+}
+
