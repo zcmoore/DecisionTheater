@@ -68,8 +68,8 @@ io.sockets.on('connection', function(socket) {
       }
 
       userListChanged();
-      io.sockets.emit('requestCamera');
 	  socket.emit('requestObjects',objectList);
+      io.sockets.emit('requestCamera');
 	  socket.emit('nightMode',nightMode);
     }
   });
@@ -94,6 +94,7 @@ io.sockets.on('connection', function(socket) {
   socket.on('nightMode', function(objectData){
     if (socket.username === activeUserName)
     {
+	  nightMode = objectData;
       socket.broadcast.emit('nightMode', objectData);
     }
   });

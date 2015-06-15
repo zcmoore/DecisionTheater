@@ -11,6 +11,7 @@ var mouseX,mouseY;
 var mouseMoved;
 var ambientLight,light,light2;
 var nightMode=false;
+var lampLights = [];
 
 function getCameraData()
 {
@@ -61,15 +62,24 @@ function onCameraUpdate(cameraData) {
 
 function onObjectCreate(objectData) {
 	loader.load(
-	'public/models/streetlamp/sl.js',
+	'public/models/light/lampJoint.js',
 	
 	function ( geometry, materials ) {
 		var material = new THREE.MeshFaceMaterial( materials );
-		var lamp = new THREE.Mesh( geometry, material );
+		var lamp = new THREE.SkinnedMesh( geometry, material );
 		scene.add(lamp);
 		lamp.position.setX(objectData.pos_x);
 		lamp.position.setY(objectData.pos_y);
 		lamp.position.setZ(objectData.pos_z);
+		var bones = lamp.skeleton.bones;
+		var bone = bones[0];
+		var pointLight = new THREE.PointLight(0xFFFF99,0.0);
+		if (nightMode){
+			pointLight.intensity = 0.8;
+		}
+		lampLights.push(pointLight);
+		scene.add(pointLight);
+		pointLight.position.set(bone.position.x,bone.position.y,bone.position.z);
 	}
 	)
 }
@@ -103,12 +113,18 @@ function turnNightOn(){
 	light.intensity = 0.0;
 	light2.intensity = 0.0;
 	nightMode = true;
+	for (i = 0; i < lampLights.length; i++) { 
+		lampLights[i].intensity = 0.8;
+	}
 }
 
 function turnNightOff(){
 	light.intensity = 1.0;
 	light2.intensity = 1.0;
 	nightMode = false;
+	for (i = 0; i < lampLights.length; i++) { 
+		lampLights[i].intensity = 0.0;
+	}
 }
 
 function changeNightMode(bool){
@@ -126,7 +142,6 @@ function changeNightMode(bool){
 
 function onMouseMove( event ) {
 	if (hasControl){
-		mouseMoved = true;
 		// calculate mouse position in normalized device coordinates
 		// (-1 to +1) for both components
 		var oldX = mouseX;
@@ -166,15 +181,24 @@ function onDocumentMouseUp( event ) {
 				var pos = intersects[0].point;
 				//console.log("intersected at x: " + pos.x + " y: " + pos.y + " z: " + pos.z );
 				loader.load(
-				'public/models/streetlamp/sl.js',
+				'public/models/light/lampJoint.js',
 				
 				function ( geometry, materials ) {
 					var material = new THREE.MeshFaceMaterial( materials );
-					var lamp = new THREE.Mesh( geometry, material );
+					var lamp = new THREE.SkinnedMesh( geometry, material );
 					scene.add(lamp);
 					lamp.position.setX(pos.x);
 					lamp.position.setY(pos.y);
 					lamp.position.setZ(pos.z);
+					var bones = lamp.skeleton.bones;
+					var bone = bones[0];
+					var pointLight = new THREE.PointLight(0xFFFF99,0.0);
+					if (nightMode){
+						pointLight.intensity = 0.8;
+					}
+					lampLights.push(pointLight);
+					scene.add(pointLight);
+					pointLight.position.set(bone.position.x,bone.position.y,bone.position.z);
 					//console.log("lamp position x: " + lamp.position.x + "," + lamp.position.y + "," + lamp.position.z + ",");
 				}
 				)
@@ -185,14 +209,6 @@ function onDocumentMouseUp( event ) {
 				};
 				
 				sendObjectCreation(objectData);
-				
-				var geometry = new THREE.SphereGeometry( 5, 32, 32 );
-				var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-				var sphere = new THREE.Mesh( geometry, material );
-				scene.add( sphere );
-				sphere.position.setX(pos.x);
-				sphere.position.setY(pos.y);
-				sphere.position.setZ(pos.z);
 			}
 		}
 	}
@@ -229,7 +245,7 @@ function fillScene() {
   scene = new THREE.Scene();
   scene.fog = new THREE.Fog(0x808080, 3000, 6000);
   // LIGHTS
-  ambientLight = new THREE.AmbientLight(0x222222);
+  ambientLight = new THREE.AmbientLight(0x111111);
   light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
   light.position.set(200, 400, 500);
 
