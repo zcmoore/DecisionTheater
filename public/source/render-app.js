@@ -71,15 +71,23 @@ function onObjectCreate(objectData) {
 		lamp.position.setX(objectData.pos_x);
 		lamp.position.setY(objectData.pos_y);
 		lamp.position.setZ(objectData.pos_z);
+		var objPos = objectData;
 		var bones = lamp.skeleton.bones;
-		var bone = bones[0];
-		var pointLight = new THREE.PointLight(0xFFFF99,0.0);
+		var pos = bones[0].position;
+		var spotLight = new THREE.SpotLight(0xFFFF99,0.0);
 		if (nightMode){
-			pointLight.intensity = 0.8;
+			spotLight.intensity = 0.8;
 		}
-		lampLights.push(pointLight);
-		scene.add(pointLight);
-		pointLight.position.set(bone.position.x,bone.position.y,bone.position.z);
+		lampLights.push(spotLight);
+		spotLight.position.set(objPos.pos_x+pos.x,objPos.pos_y+pos.y,objPos.pos_z+pos.z);
+		var lightTarget = new THREE.Object3D(1000,-1000,-1000);
+		spotLight.target = lightTarget;
+		scene.add(lightTarget);
+		spotLight.castShadow = true;
+		spotLight.shadowCameraNear = 500;
+		spotLight.shadowCameraFar = 1000;
+		spotLight.shadowCameraFov = 30;
+		scene.add(spotLight);
 	}
 	)
 }
@@ -192,13 +200,18 @@ function onDocumentMouseUp( event ) {
 					lamp.position.setZ(pos.z);
 					var bones = lamp.skeleton.bones;
 					var bone = bones[0];
-					var pointLight = new THREE.PointLight(0xFFFF99,0.0);
+					var spotLight = new THREE.SpotLight(0xFFFF99,0.0);
 					if (nightMode){
-						pointLight.intensity = 0.8;
+						spotLight.intensity = 0.8;
 					}
-					lampLights.push(pointLight);
-					scene.add(pointLight);
-					pointLight.position.set(bone.position.x,bone.position.y,bone.position.z);
+					lampLights.push(spotLight);
+					scene.add(spotLight);
+					spotLight.position.set(pos.x+bone.position.x,pos.y+bone.position.y,pos.z+bone.position.z);
+					spotLight.target = new THREE.Object3D(0,-1000,0);
+					spotLight.castShadow = true;
+					spotLight.shadowCameraNear = 500;
+					spotLight.shadowCameraFar = 1000;
+					spotLight.shadowCameraFov = 30;
 					//console.log("lamp position x: " + lamp.position.x + "," + lamp.position.y + "," + lamp.position.z + ",");
 				}
 				)
@@ -245,7 +258,7 @@ function fillScene() {
   scene = new THREE.Scene();
   scene.fog = new THREE.Fog(0x808080, 3000, 6000);
   // LIGHTS
-  ambientLight = new THREE.AmbientLight(0x111111);
+  ambientLight = new THREE.AmbientLight(0x050505);
   light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
   light.position.set(200, 400, 500);
 
