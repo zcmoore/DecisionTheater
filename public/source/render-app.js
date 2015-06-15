@@ -9,6 +9,8 @@ var loader;
 var city;
 var mouseX,mouseY;
 var mouseMoved;
+var ambientLight,light,light2;
+var nightMode=false;
 
 function getCameraData()
 {
@@ -86,6 +88,40 @@ function onWindowResize() {
 
   camera.aspect = canvasWidth / canvasHeight;
   camera.updateProjectionMatrix();
+}
+
+function updateNightMode(bool){
+	if (bool == true){
+		turnNightOn();
+	}
+	else {
+		turnNightOff();
+	}
+}
+
+function turnNightOn(){
+	light.intensity = 0.0;
+	light2.intensity = 0.0;
+	nightMode = true;
+}
+
+function turnNightOff(){
+	light.intensity = 1.0;
+	light2.intensity = 1.0;
+	nightMode = false;
+}
+
+function changeNightMode(bool){
+	if (hasControl){
+		if (bool == false && nightMode == true){ //night is off
+			turnNightOff();
+			sendUpdateLightMode(bool);
+		}
+		else if (bool == true && nightMode == false){ // night is on
+			turnNightOn();
+			sendUpdateLightMode(bool);
+		}
+	}
 }
 
 function onMouseMove( event ) {
@@ -193,11 +229,11 @@ function fillScene() {
   scene = new THREE.Scene();
   scene.fog = new THREE.Fog(0x808080, 3000, 6000);
   // LIGHTS
-  var ambientLight = new THREE.AmbientLight(0x222222);
-  var light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
+  ambientLight = new THREE.AmbientLight(0x222222);
+  light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
   light.position.set(200, 400, 500);
 
-  var light2 = new THREE.DirectionalLight(0xFFFFFF, 1.0);
+  light2 = new THREE.DirectionalLight(0xFFFFFF, 1.0);
   light2.position.set(-400, 200, -300);
 
   scene.add(ambientLight);

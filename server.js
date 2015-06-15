@@ -12,6 +12,8 @@ var usernames = {};
 var activeSocket = null;
 var userQueue = [];
 var activeUserName;
+var viewingMode = false;
+var nightMode = false;
 var objectList=[];
 
 var messageList = [];
@@ -68,6 +70,7 @@ io.sockets.on('connection', function(socket) {
       userListChanged();
       io.sockets.emit('requestCamera');
 	  socket.emit('requestObjects',objectList);
+	  socket.emit('nightMode',nightMode);
     }
   });
 
@@ -85,6 +88,13 @@ io.sockets.on('connection', function(socket) {
     {
 	  objectList.push(objectData);
       socket.broadcast.emit('objectCreated', objectData);
+    }
+  });
+  
+  socket.on('nightMode', function(objectData){
+    if (socket.username === activeUserName)
+    {
+      socket.broadcast.emit('nightMode', objectData);
     }
   });
 

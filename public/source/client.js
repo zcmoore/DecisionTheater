@@ -56,6 +56,10 @@ function connectToServer() {
   socket.on('requestObjects', function(objects) {
     onObjectListCreate(objects);
   });
+  
+  socket.on('nightMode', function(bool){
+	updateNightMode(bool);
+  });
 
   socket.on('serverResponse', function(response) {
     // if server rejected login
@@ -92,6 +96,10 @@ function sendUpdatedCameraInformation(cameraData) {
 
 function sendObjectCreation(object){
   socket.emit('objectCreated',object);
+}
+
+function sendUpdateLightMode(bool){
+  socket.emit('nightMode',bool);
 }
 
 function relinquishControls() {
