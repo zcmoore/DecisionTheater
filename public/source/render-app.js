@@ -213,7 +213,7 @@ function fillScene() {
 		// load a resource
 		loader.load(
 		// resource URL
-		'public/models/smallcity/small.js',
+		'../public/models/smallcity/small.js',
 		// Function when resource is loaded
 		function ( geometry, materials ) {
 			var material = new THREE.MeshFaceMaterial( materials );
