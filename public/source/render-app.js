@@ -9,6 +9,9 @@ var loader;
 var city;
 var mouseX,mouseY;
 var mouseMoved;
+var ambientLight,light,light2;
+var nightMode=false;
+var lampLights = [];
 
 function getCameraData()
 {
@@ -59,15 +62,32 @@ function onCameraUpdate(cameraData) {
 
 function onObjectCreate(objectData) {
 	loader.load(
-	'public/models/streetlamp/sl.js',
+	'public/models/light/lampJoint.js',
 	
 	function ( geometry, materials ) {
 		var material = new THREE.MeshFaceMaterial( materials );
-		var lamp = new THREE.Mesh( geometry, material );
+		var lamp = new THREE.SkinnedMesh( geometry, material );
 		scene.add(lamp);
 		lamp.position.setX(objectData.pos_x);
 		lamp.position.setY(objectData.pos_y);
 		lamp.position.setZ(objectData.pos_z);
+		var objPos = objectData;
+		var bones = lamp.skeleton.bones;
+		var pos = bones[0].position;
+		var spotLight = new THREE.SpotLight(0xFFFF99,0.0);
+		if (nightMode){
+			spotLight.intensity = 0.8;
+		}
+		lampLights.push(spotLight);
+		spotLight.position.set(objPos.pos_x+pos.x,objPos.pos_y+pos.y,objPos.pos_z+pos.z);
+		var lightTarget = new THREE.Object3D(1000,-1000,-1000);
+		spotLight.target = lightTarget;
+		scene.add(lightTarget);
+		spotLight.castShadow = true;
+		spotLight.shadowCameraNear = 500;
+		spotLight.shadowCameraFar = 1000;
+		spotLight.shadowCameraFov = 30;
+		scene.add(spotLight);
 	}
 	)
 }
@@ -88,9 +108,48 @@ function onWindowResize() {
   camera.updateProjectionMatrix();
 }
 
+function updateNightMode(bool){
+	if (bool == true){
+		turnNightOn();
+	}
+	else {
+		turnNightOff();
+	}
+}
+
+function turnNightOn(){
+	light.intensity = 0.0;
+	light2.intensity = 0.0;
+	nightMode = true;
+	for (i = 0; i < lampLights.length; i++) { 
+		lampLights[i].intensity = 0.8;
+	}
+}
+
+function turnNightOff(){
+	light.intensity = 1.0;
+	light2.intensity = 1.0;
+	nightMode = false;
+	for (i = 0; i < lampLights.length; i++) { 
+		lampLights[i].intensity = 0.0;
+	}
+}
+
+function changeNightMode(bool){
+	if (hasControl){
+		if (bool == false && nightMode == true){ //night is off
+			turnNightOff();
+			sendUpdateLightMode(bool);
+		}
+		else if (bool == true && nightMode == false){ // night is on
+			turnNightOn();
+			sendUpdateLightMode(bool);
+		}
+	}
+}
+
 function onMouseMove( event ) {
 	if (hasControl){
-		mouseMoved = true;
 		// calculate mouse position in normalized device coordinates
 		// (-1 to +1) for both components
 		var oldX = mouseX;
@@ -130,15 +189,29 @@ function onDocumentMouseUp( event ) {
 				var pos = intersects[0].point;
 				//console.log("intersected at x: " + pos.x + " y: " + pos.y + " z: " + pos.z );
 				loader.load(
-				'public/models/streetlamp/sl.js',
+				'public/models/light/lampJoint.js',
 				
 				function ( geometry, materials ) {
 					var material = new THREE.MeshFaceMaterial( materials );
-					var lamp = new THREE.Mesh( geometry, material );
+					var lamp = new THREE.SkinnedMesh( geometry, material );
 					scene.add(lamp);
 					lamp.position.setX(pos.x);
 					lamp.position.setY(pos.y);
 					lamp.position.setZ(pos.z);
+					var bones = lamp.skeleton.bones;
+					var bone = bones[0];
+					var spotLight = new THREE.SpotLight(0xFFFF99,0.0);
+					if (nightMode){
+						spotLight.intensity = 0.8;
+					}
+					lampLights.push(spotLight);
+					scene.add(spotLight);
+					spotLight.position.set(pos.x+bone.position.x,pos.y+bone.position.y,pos.z+bone.position.z);
+					spotLight.target = new THREE.Object3D(0,-1000,0);
+					spotLight.castShadow = true;
+					spotLight.shadowCameraNear = 500;
+					spotLight.shadowCameraFar = 1000;
+					spotLight.shadowCameraFov = 30;
 					//console.log("lamp position x: " + lamp.position.x + "," + lamp.position.y + "," + lamp.position.z + ",");
 				}
 				)
@@ -149,14 +222,6 @@ function onDocumentMouseUp( event ) {
 				};
 				
 				sendObjectCreation(objectData);
-				
-				var geometry = new THREE.SphereGeometry( 5, 32, 32 );
-				var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-				var sphere = new THREE.Mesh( geometry, material );
-				scene.add( sphere );
-				sphere.position.setX(pos.x);
-				sphere.position.setY(pos.y);
-				sphere.position.setZ(pos.z);
 			}
 		}
 	}
@@ -193,11 +258,11 @@ function fillScene() {
   scene = new THREE.Scene();
   scene.fog = new THREE.Fog(0x808080, 3000, 6000);
   // LIGHTS
-  var ambientLight = new THREE.AmbientLight(0x222222);
-  var light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
+  ambientLight = new THREE.AmbientLight(0x050505);
+  light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
   light.position.set(200, 400, 500);
 
-  var light2 = new THREE.DirectionalLight(0xFFFFFF, 1.0);
+  light2 = new THREE.DirectionalLight(0xFFFFFF, 1.0);
   light2.position.set(-400, 200, -300);
 
   scene.add(ambientLight);

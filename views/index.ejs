@@ -7,7 +7,7 @@
   <script type="text/javascript" src="../public/lib/jquery-1.11.3.min.js"></script>
   <script src="../../socket.io/socket.io.js"></script>
   <link rel="stylesheet" href="../public/lib/bootstrap.css" />
-  <script type="text/javascript" src="../public/lib/bootstrap.js"></script>
+  <script type="text/javascript" src="../public/lib/bootstrap.js"></script>  
   <link rel="stylesheet" href="../public/app.css" />
 
   <script type="text/javascript" src="../public/lib/three.min.js"></script>
@@ -50,9 +50,14 @@
 		  <button type="button" id = "viewMode" class="btn btn-primary">Viewing</button>
 		  <button type="button" id = "editMode" class="btn btn-success">Editing</button>
 		  <div id="viewing" class = "collapse">
+		  </br>
 		  Viewing Options
+		  </br>
+		  <button type="button" id = "nightOn" class="btn btn-primary">Night Mode</button>
+		  <button type="button" id = "nightOff" class="btn btn-success">Day Mode</button>
 		  </div>
 		  <div id="editing">
+		  </br>
 		  Editing Options
 		  </div>
           <hr />
@@ -102,6 +107,12 @@
 		$("#editMode").click(function(){
 			$("#viewing").collapse("hide");
 			$("#editing").collapse("show");
+		});
+		$("#nightOn").click(function(){
+		changeNightMode(true);
+		});
+		$("#nightOff").click(function(){
+		changeNightMode(false);
 		});
 	});
 	});
