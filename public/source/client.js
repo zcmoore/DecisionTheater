@@ -48,10 +48,9 @@ function connectToServer() {
   socket.on('requestCamera', function() {
     sendUpdatedCameraInformation(getCameraData());
   });
-  
+ 
   socket.on('objectCreated', function(data) {
     onObjectCreate(data);
-	console.log("does this get called on the inital client?");
   });
   
   socket.on('requestObjects', function(objects) {

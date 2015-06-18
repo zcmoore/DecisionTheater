@@ -87,7 +87,8 @@ io.sockets.on('connection', function(socket) {
     if (socket.username === activeUserName)
     {
       createObject(objectData);
-      socket.broadcast.emit('objectCreated', objectData);
+	  io.sockets.emit('objectCreated', objectData);
+      //socket.broadcast.emit('objectCreated', objectData);
     }
   });
   

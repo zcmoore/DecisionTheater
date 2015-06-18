@@ -12,6 +12,7 @@ var mouseMoved;
 var ambientLight,light,light2;
 var nightMode=false;
 var lampLights = [];
+var lightList = [];
 
 function getCameraData()
 {
@@ -88,6 +89,7 @@ function onObjectCreate(objectData) {
 		spotLight.shadowCameraFar = 1000;
 		spotLight.shadowCameraFov = 30;
 		scene.add(spotLight);
+		lightList.push(spotLight);
 	}
 	)
 }
@@ -188,7 +190,7 @@ function onDocumentMouseUp( event ) {
 			if (intersects.length > 0){
 				var pos = intersects[0].point;
 				//console.log("intersected at x: " + pos.x + " y: " + pos.y + " z: " + pos.z );
-				loader.load(
+				/*loader.load(
 				'public/models/light/lampJoint.js',
 				
 				function ( geometry, materials ) {
@@ -198,23 +200,24 @@ function onDocumentMouseUp( event ) {
 					lamp.position.setX(pos.x);
 					lamp.position.setY(pos.y);
 					lamp.position.setZ(pos.z);
-					var bones = lamp.skeleton.bones;
+					//var bones = lamp.skeleton.bones;
 					var bone = bones[0];
 					var spotLight = new THREE.SpotLight(0xFFFF99,0.0);
 					if (nightMode){
 						spotLight.intensity = 0.8;
 					}
 					lampLights.push(spotLight);
-					scene.add(spotLight);
 					spotLight.position.set(pos.x+bone.position.x,pos.y+bone.position.y,pos.z+bone.position.z);
 					spotLight.target = new THREE.Object3D(0,-1000,0);
 					spotLight.castShadow = true;
 					spotLight.shadowCameraNear = 500;
 					spotLight.shadowCameraFar = 1000;
 					spotLight.shadowCameraFov = 30;
+					scene.add(spotLight);
+					lightList.push(spotLight);
 					//console.log("lamp position x: " + lamp.position.x + "," + lamp.position.y + "," + lamp.position.z + ",");
 				}
-				)
+				)*/
 				var objectData = {
 					pos_x: pos.x,
 					pos_y: pos.y,

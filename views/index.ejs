@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="../public/lib/bootstrap.css" />
   <script type="text/javascript" src="../public/lib/bootstrap.js"></script>  
   <link rel="stylesheet" href="../public/app.css" />
+  
+  <script type="text/javascript" src="../public/models/smallcityroadWaypoints.js"></script>
 
   <script type="text/javascript" src="../public/lib/three.min.js"></script>
   <script type="text/javascript" src="../public/lib/Coordinates.js"></script>
@@ -50,15 +52,17 @@
 		  <button type="button" id = "viewMode" class="btn btn-primary">Viewing</button>
 		  <button type="button" id = "editMode" class="btn btn-success">Editing</button>
 		  <div id="viewing" class = "collapse">
-		  </br>
 		  Viewing Options
 		  </br>
 		  <button type="button" id = "nightOn" class="btn btn-primary">Night Mode</button>
 		  <button type="button" id = "nightOff" class="btn btn-success">Day Mode</button>
 		  </div>
 		  <div id="editing">
-		  </br>
 		  Editing Options
+		  </br>
+		  <button type="button" id = "Add" class="btn btn-primary">Add an Object</button>
+		  <button type="button" id = "Delete" class="btn btn-success">Delete Object</button>
+		  </div>
 		  </div>
           <hr />
         </div>
@@ -109,10 +113,14 @@
 			$("#editing").collapse("show");
 		});
 		$("#nightOn").click(function(){
-		changeNightMode(true);
+			changeNightMode(true);
 		});
 		$("#nightOff").click(function(){
-		changeNightMode(false);
+			changeNightMode(false);
+		});
+		$("#Add").click(function(){
+		});
+		$("#Delete").click(function(){
 		});
 	});
 	});
