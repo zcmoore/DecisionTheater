@@ -4,16 +4,16 @@ body {
   margin-right: 0px;
   font-size: 1.75em;
 }
+
 .innerbody {
-  height: 98%;
+  height: 100%;
   top: 0px;
-  width: 96%;
-  left: 2%;
+  width: 100%;
   position: relative;
   overflow: hidden;
 }
 #dashboard {
-  padding: 80px 0px;
+  padding: 48px 0px;
   float: left;
 }
 .border {
@@ -51,3 +51,33 @@ body {
   -moz-transform: translateY(-50%);
   /* Firefox 3.5+ */
 }
+.clear { 
+  clear: both; 
+  height: 0;
+  font-size: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  width: 0;
+  line-height: 0;
+}
+.menuclass{
+  margin: 0 auto;
+  position:absolute;
+  margin-left:15px;
+  
+}
+.col-md-8{
+}
+.col-md-4{
+  background-color:rgba(255,255,255,.65);
+  width:auto;
+  margin:5px;
+}
+#menu{
+  left:0;
+  margin:5px;
+}
+nav div{height:200px;}
+nav div{overflow:hidden; overflow-y:scroll;}
+

@@ -4,11 +4,14 @@
   <title>Decision Theatre</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <script type="text/javascript" src="../public/lib/jquery-1.11.3.min.js"></script>
   <script src="../../socket.io/socket.io.js"></script>
   <link rel="stylesheet" href="../public/lib/bootstrap.css" />
+  <script type="text/javascript" src="../public/lib/bootstrap.js"></script>  
   <link rel="stylesheet" href="../public/app.css" />
+  
+  <script type="text/javascript" src="../public/models/smallcityroadWaypoints.js"></script>
 
-  <script type="text/javascript" src="../public/lib/jquery-1.8.3.min.js"></script>
   <script type="text/javascript" src="../public/lib/three.min.js"></script>
   <script type="text/javascript" src="../public/lib/Coordinates.js"></script>
   <script type="text/javascript" src="../public/lib/OrbitControls.js"></script>
@@ -35,28 +38,53 @@
       </div>
     </div>
     <!-- /Nav Bar  -->
-
+	
     <div class="container" id="dashboard">
       <div class="row" />
-        <div class="col-md-4">
+		<div class="col-md-8">
+          <div id="jsviewport">
+          </div>
+		  <div class="clear"></div>
+        </div>
+        <!-- /Camera Space  -->
+		<div class="menuclass">
+		  <button type="button" id="menu" class="btn btn-primary">Menu</button>
+		  <br/>
+		  <div class="col-md-4 collapse">
           <b>Users</b>
           <hr />
           <div id="users"></div>
           <hr />
-        </div>
+		  <b>Menu</b>
+		  <div id="menu"></div>
+		  Mode: 
+		  <button type="button" id = "viewMode" class="btn btn-primary">Viewing</button>
+		  <button type="button" id = "editMode" class="btn btn-success">Editing</button>
+		  <div id="viewing" class = "collapse">
+		  Viewing Options
+		  </br>
+		  <button type="button" id = "nightOn" class="btn btn-primary">Night Mode</button>
+		  <button type="button" id = "nightOff" class="btn btn-success">Day Mode</button>
+		  </div>
+		  <div id="editing">
+		  Editing Options
+		  </br>
+		  <button type="button" id = "Add" class="btn btn-primary">Add an Object</button>
+		  <button type="button" id = "Delete" class="btn btn-success">Delete Object</button>
+		  </div>
+		  <hr/>
+		  <details>
+				<summary>Show Notifications</summary>
+				<nav>
+					<div id="notifications" style="text-align: center;"></div>
+				</nav>
+	      </details>
+          <hr/>
+		  <div class="clear"></div>
+		</div>
+		</div>
+		
         <!-- /User List  -->
-
-        <div class="col-md-8">
-          <div style="padding-left: 30%">
-            <div id="notifications" style="text-align: center;"></div>
-            <hr/>
-          </div>
-
-          <div id="jsviewport">
-          </div>
-        </div>
-        <!-- /Camera Space  -->
-
       </div>
     </div>
   <!-- /Dashboard  -->
@@ -74,11 +102,36 @@
   $(document).ready(function(){ 
     $('#validLogin').hide();
     $('#invalidLogin').hide();
-
+	
     startRenderApp();
     startClient();
-
     onWindowResize();
+	$("#viewing").collapse("hide");
+	$("#editing").collapse("show");
+	
+	$(document).ready(function(){
+		$("#viewMode").click(function(){
+			$("#viewing").collapse("show");
+			$("#editing").collapse("hide");
+		});
+		$("#editMode").click(function(){
+			$("#viewing").collapse("hide");
+			$("#editing").collapse("show");
+		});
+		$("#nightOn").click(function(){
+			changeNightMode(true);
+		});
+		$("#nightOff").click(function(){
+			changeNightMode(false);
+		});
+		$("#Add").click(function(){
+		});
+		$("#Delete").click(function(){
+		});
+		$("#menu").click(function(){
+			$(".col-md-4").collapse("toggle");
+		});
+	});
 	});
   </script>
 </body>
