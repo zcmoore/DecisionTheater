@@ -101,7 +101,7 @@ function onObjectListCreate(objectList) {
 }
 
 function onWindowResize() {
-  canvasWidth = window.innerWidth * .75;
+  canvasWidth = window.innerWidth;
   canvasHeight = window.innerHeight - $('#jsviewport').offset().top;
 
   renderer.setSize(canvasWidth, canvasHeight);
