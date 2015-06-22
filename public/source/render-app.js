@@ -11,8 +11,9 @@ var mouseX,mouseY;
 var mouseMoved;
 var ambientLight,light,light2;
 var nightMode=false;
-var lamps = [];
-var lightList = [];
+var lamps = {};
+var selectableObjects=[];
+var lightList = {};
 var jsonData;
 var lightPlaces = [];
 var addablePlaces = [];
@@ -86,24 +87,30 @@ function onObjectCreate(objectData) {
 		if (nightMode){
 			spotLight.intensity = 0.8;
 		}
-		lamps.push(lamp);
+		lamp.serverID=objectData.id;
+		lamps[objectData.id]=lamp;
+		selectableObjects.push(lamp);
 		spotLight.position.set(objPos.pos_x+pos.x,objPos.pos_y+pos.y,objPos.pos_z+pos.z);
-		var lightTarget = new THREE.Object3D(1000,-1000,-1000);
+		var lightTarget = new THREE.Object3D();
+		lightTarget.position.set(objPos.pos_x+pos.x,objPos.pos_y+pos.y-100,objPos.pos_z+pos.z);
 		spotLight.target = lightTarget;
 		scene.add(lightTarget);
 		spotLight.castShadow = true;
 		spotLight.shadowCameraNear = 500;
 		spotLight.shadowCameraFar = 1000;
-		spotLight.shadowCameraFov = 30;
+		spotLight.shadowCameraFov = 80;
 		scene.add(spotLight);
-		lightList.push(spotLight);
+		lightList[objectData.id]=spotLight;
 	}
 	);
 }
 
 function onObjectListCreate(objectList) {
-	for (i = 0; i < objectList.length; i++) { 
-		onObjectCreate(objectList[i]);
+	var keys = [];
+	for(var k in objectList) keys.push(k);
+
+	for (i = 0; i < keys.length; i++) { 
+		onObjectCreate(objectList[keys[i]]);
 	}
 }
 
@@ -217,11 +224,25 @@ function onDocumentMouseDown( event ) {
 	}
 }
 
+function deleteObjectByID(id){
+	if (id != '-1'){
+		for(i = 0; i < selectableObjects.length; i++) {
+			if(selectableObjects[i] === lamps[id]) {
+			   selectableObjects.splice(i, 1);
+			}
+		}
+		scene.remove(lamps[id]);
+		delete lamps[id];
+		scene.remove(lightList[id]);
+		delete lightList[id];
+	}
+}
+
 function deleteSelectedObject(){
 	if (selectedObject){
-		scene.remove(selectedObject);
+		sendDeletionNotice(selectedObject.serverID);
+		//scene.remove(selectedObject);
 		selectedObject = null;
-		
 	}
 }
 
@@ -242,6 +263,7 @@ function onDocumentMouseUp( event ) {
 					}
 				}
 				var objectData = {
+					id: "-1",
 					pos_x: obj.position.x,
 					pos_y: obj.position.y,
 					pos_z: obj.position.z
@@ -253,9 +275,8 @@ function onDocumentMouseUp( event ) {
 		else {
 			var raycaster = new THREE.Raycaster();
 			raycaster.setFromCamera( mouse, camera );	
-			
-			
-			var intersects = raycaster.intersectObjects(lamps);
+
+			var intersects = raycaster.intersectObjects(selectableObjects);
 
 			if (intersects.length > 0){
 				if(selectedObject){
