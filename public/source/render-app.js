@@ -11,8 +11,15 @@ var mouseX,mouseY;
 var mouseMoved;
 var ambientLight,light,light2;
 var nightMode=false;
-var lampLights = [];
+var lamps = [];
 var lightList = [];
+var jsonData;
+var lightPlaces = [];
+var addablePlaces = [];
+var adding = false;
+var selectedObject;
+var oldMaterial;
+var addableLampMesh;
 
 function getCameraData()
 {
@@ -79,7 +86,7 @@ function onObjectCreate(objectData) {
 		if (nightMode){
 			spotLight.intensity = 0.8;
 		}
-		lampLights.push(spotLight);
+		lamps.push(lamp);
 		spotLight.position.set(objPos.pos_x+pos.x,objPos.pos_y+pos.y,objPos.pos_z+pos.z);
 		var lightTarget = new THREE.Object3D(1000,-1000,-1000);
 		spotLight.target = lightTarget;
@@ -91,7 +98,7 @@ function onObjectCreate(objectData) {
 		scene.add(spotLight);
 		lightList.push(spotLight);
 	}
-	)
+	);
 }
 
 function onObjectListCreate(objectList) {
@@ -123,8 +130,8 @@ function turnNightOn(){
 	light.intensity = 0.0;
 	light2.intensity = 0.0;
 	nightMode = true;
-	for (i = 0; i < lampLights.length; i++) { 
-		lampLights[i].intensity = 0.8;
+	for (i = 0; i < lightList.length; i++) { 
+		lightList[i].intensity = 0.8;
 	}
 }
 
@@ -132,8 +139,8 @@ function turnNightOff(){
 	light.intensity = 1.0;
 	light2.intensity = 1.0;
 	nightMode = false;
-	for (i = 0; i < lampLights.length; i++) { 
-		lampLights[i].intensity = 0.0;
+	for (i = 0; i < lightList.length; i++) { 
+		lightList[i].intensity = 0.0;
 	}
 }
 
@@ -148,6 +155,37 @@ function changeNightMode(bool){
 			sendUpdateLightMode(bool);
 		}
 	}
+}
+
+function showAddablePlaces(){
+	if (addablePlaces.length == 0){
+		for (i = 0; i < lightPlaces.length; i++) {
+			var pos = lightPlaces[i];
+			var material = new THREE.MeshBasicMaterial( {color: 0x00ffff} );
+			var mesh = new THREE.Mesh(addableLampMesh, material );
+			addablePlaces.push(mesh);
+			mesh.position.set(pos.x,pos.y,pos.z);
+			scene.add(mesh);
+		}
+	}
+	else{
+		for (i = 0; i < addablePlaces.length;i++) {
+			scene.add(addablePlaces[i]);
+		}
+	}
+	adding = true;
+	var geometry = new THREE.SphereGeometry( 10, 32, 32 );
+	var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+	var mesh = new THREE.Mesh( geometry, material );
+	mesh.position.set(lightPlaces[0].x,lightPlaces[0].y,lightPlaces[0].z);
+	//scene.add(mesh);
+}
+
+function hideAddablePlaces(){
+	for (i = 0; i < addablePlaces.length;i++) {
+		scene.remove(addablePlaces[i]);
+	}
+	adding = false;
 }
 
 function onMouseMove( event ) {
@@ -179,58 +217,61 @@ function onDocumentMouseDown( event ) {
 	}
 }
 
+function deleteSelectedObject(){
+	if (selectedObject){
+		scene.remove(selectedObject);
+		selectedObject = null;
+		
+	}
+}
+
 function onDocumentMouseUp( event ) {
-	if (hasControl){
-		if (mouse.x <= 1 && mouse.x >=-1 && mouse.y <= 1 && mouse.y >=-1 && event.button == 0 && mouseMoved == false){
+	if (hasControl && mouse.x <= 1 && mouse.x >=-1 && mouse.y <= 1 && mouse.y >=-1 && event.button == 0){
+		if (adding && mouseMoved == false){
 			var raycaster = new THREE.Raycaster();
 			raycaster.setFromCamera( mouse, camera );	
 
-			var intersects = raycaster.intersectObject(city);
+			var intersects = raycaster.intersectObjects(addablePlaces);
 
 			if (intersects.length > 0){
-				var pos = intersects[0].point;
-				//console.log("intersected at x: " + pos.x + " y: " + pos.y + " z: " + pos.z );
-				/*loader.load(
-				'public/models/light/lampJoint.js',
-				
-				function ( geometry, materials ) {
-					var material = new THREE.MeshFaceMaterial( materials );
-					var lamp = new THREE.SkinnedMesh( geometry, material );
-					scene.add(lamp);
-					lamp.position.setX(pos.x);
-					lamp.position.setY(pos.y);
-					lamp.position.setZ(pos.z);
-					//var bones = lamp.skeleton.bones;
-					var bone = bones[0];
-					var spotLight = new THREE.SpotLight(0xFFFF99,0.0);
-					if (nightMode){
-						spotLight.intensity = 0.8;
+				var obj = intersects[0].object;	
+				scene.remove(obj);
+				for(i = 0; i < addablePlaces.length; i++) {
+					if(addablePlaces[i] === obj) {
+					   addablePlaces.splice(i, 1);
 					}
-					lampLights.push(spotLight);
-					spotLight.position.set(pos.x+bone.position.x,pos.y+bone.position.y,pos.z+bone.position.z);
-					spotLight.target = new THREE.Object3D(0,-1000,0);
-					spotLight.castShadow = true;
-					spotLight.shadowCameraNear = 500;
-					spotLight.shadowCameraFar = 1000;
-					spotLight.shadowCameraFov = 30;
-					scene.add(spotLight);
-					lightList.push(spotLight);
-					//console.log("lamp position x: " + lamp.position.x + "," + lamp.position.y + "," + lamp.position.z + ",");
 				}
-				)*/
 				var objectData = {
-					pos_x: pos.x,
-					pos_y: pos.y,
-					pos_z: pos.z
+					pos_x: obj.position.x,
+					pos_y: obj.position.y,
+					pos_z: obj.position.z
 				};
-				
+				hideAddablePlaces();
 				sendObjectCreation(objectData);
+			}
+		}
+		else {
+			var raycaster = new THREE.Raycaster();
+			raycaster.setFromCamera( mouse, camera );	
+			
+			
+			var intersects = raycaster.intersectObjects(lamps);
+
+			if (intersects.length > 0){
+				if(selectedObject){
+					selectedObject.material = oldMaterial;
+				}
+				var obj = intersects[0].object;	
+				selectedObject = obj;
+				oldMaterial = selectedObject.material;
+				selectedObject.material = new THREE.MeshBasicMaterial( { color: 0x00ff00} );
 			}
 		}
 	}
 }
 
 function init() {
+
   var canvasWidth = window.innerWidth * .75;
   var canvasHeight = window.innerHeight - $('#jsviewport').offset().top;
   var canvasRatio = canvasWidth / canvasHeight;
@@ -254,6 +295,7 @@ function init() {
   fillScene();
   addToDOM();
   render();
+  
 }
 
 function fillScene() {
@@ -271,24 +313,26 @@ function fillScene() {
   scene.add(ambientLight);
   scene.add(light);
   scene.add(light2);
+  	$.getJSON( "../public/models/smallcity/roadWaypoints.json", function( data ) {
+		for (i = 0; i < data.road1.length; i++) {
+			var pos = data.road1[i];
+			lightPlaces.push(new THREE.Vector3(pos.x,pos.y,pos.z));
+		}
+	});
 
-  /*Coordinates.drawGround({
-    size: 1000
-  });*/
-	// instantiate a loader
 	loader = new THREE.JSONLoader();
-
-		// load a resource
-		loader.load(
-		// resource URL
+	loader.load(
 		'../public/models/smallcity/small.js',
-		// Function when resource is loaded
 		function ( geometry, materials ) {
 			var material = new THREE.MeshFaceMaterial( materials );
 			city = new THREE.Mesh( geometry, material );
 			scene.add( city );
-	}
-);
+	});
+	loader.load(
+		'public/models/light/lampJoint.js',
+		function ( geometry, materials ) {
+			addableLampMesh = geometry;
+	});
 }
 
 function addToDOM() {
