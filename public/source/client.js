@@ -5,9 +5,10 @@ var hasControl;
 function startClient() {
   hasControl = false;
   if (requestName()) {
-    connectToServer();
+      connectToServer();
+      
     $("#notifications").empty();
-    $("#notifications").append('Logged in as <b><u>' + name + '</u></b>');
+    $("#notifications").append(getTimestamp() +' Logged in as <b><u>' + name + '</u></b>');
   }
 }
 
@@ -19,7 +20,7 @@ function connectToServer() {
     socket.emit('adduser', name);
   });
 
-  socket.on('updateusers', function(users, activeUserName) {
+  socket.on('updateusers', function (users, activeUserName) {
     $('#users').empty();
     $.each(users, function(username, value) {
       if (username === activeUserName) {
@@ -115,4 +116,19 @@ function requestControls() {
     var jsonMessage = JSON.stringify(message);
     socket.send(jsonMessage);
     */
+}
+
+function getTimestamp() {
+    var date = new Date();
+    var day = ('0' + date.getDate()).slice(-2);
+    var month = ('0' + (date.getMonth() + 1)).slice(-2);
+    var year = date.getFullYear();
+    var hour = date.getHours();
+    var min = ('0' + date.getMinutes()).slice(-2);
+    var sec = ('0' + date.getSeconds()).slice(-2);
+    if (hour > 12) {
+        hour -= 12;
+    }
+    hour = ('0' + hour).slice(-2);
+    return month + '/' + day + '/' + year + ' ' + hour + ':' + min + ':' + sec;
 }

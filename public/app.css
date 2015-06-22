@@ -4,6 +4,7 @@ body {
   margin-right: 0px;
   font-size: 1.75em;
 }
+
 .innerbody {
   height: 98%;
   top: 0px;
@@ -51,3 +52,22 @@ body {
   -moz-transform: translateY(-50%);
   /* Firefox 3.5+ */
 }
+.clear { 
+  clear: both; 
+  height: 0;
+  font-size: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  width: 0;
+  line-height: 0;
+}
+.col-md-4{
+  margin: 0 auto;
+}
+.col-md-8{
+  float:right;
+}
+nav div{height:200px;}
+nav div{overflow:hidden; overflow-y:scroll;}
+
