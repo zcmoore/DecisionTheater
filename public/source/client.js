@@ -44,7 +44,6 @@ function connectToServer() {
 
   socket.on('controlgrant', function(username) {
     hasControl = (name === username);
-    $("#notifications").append('<div>' + getTimestamp() +' Control given to <b><u>' + name + '</u></b></div>');
   });
 
   socket.on('cameraUpdate', function(data) {
@@ -57,7 +56,6 @@ function connectToServer() {
 
   socket.on('objectCreated', function(data) {
     onObjectCreate(data);
-    $("#notifications").append('<div>' + getTimestamp() +' Object created at (' + data.pos_x.toFixed(2) + ', ' + data.pos_y.toFixed(2) + ', ' + data.pos_z.toFixed(2) + ')</div>');
   });
 
   socket.on('requestObjects', function(objects) {
@@ -66,8 +64,6 @@ function connectToServer() {
 
   socket.on('nightMode', function(bool){
 	updateNightMode(bool);
-    var mode = (bool) ? 'Night Mode' : 'Day Mode';
-    $("#notifications").append('<div>' + getTimestamp() +' Switched to ' + mode + '</div>');
   });
 
   socket.on('serverResponse', function(response) {

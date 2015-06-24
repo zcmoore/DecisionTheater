@@ -37,7 +37,13 @@ app.get('/', function(req, res) {
 function grantControl(socket) {
   activeUserName = socket.username;
   io.sockets.emit('controlgrant', socket.username);
+  io.sockets.emit('serverNotification', 'Control given to ' + wrapUsername(socket.username));
   userListChanged();
+}
+
+function wrapUsername(username)
+{
+    return '<b><u>' + username + '</u></b>';
 }
 
 function userListChanged() {
@@ -71,6 +77,7 @@ io.sockets.on('connection', function(socket) {
 	  socket.emit('requestObjects', objectList);
       io.sockets.emit('requestCamera');
 	  socket.emit('nightMode', nightMode);
+      socket.broadcast.emit('serverNotification', wrapUsername(username) + ' has joined.');
     }
   });
 
@@ -89,6 +96,8 @@ io.sockets.on('connection', function(socket) {
       createObject(objectData);
 	  io.sockets.emit('objectCreated', objectData);
       //socket.broadcast.emit('objectCreated', objectData);
+      var positonString = objectData.pos_x.toFixed(2) + ', ' + objectData.pos_y.toFixed(2) + ', ' + objectData.pos_z.toFixed(2);
+      io.sockets.emit('serverNotification', 'Object created at (' + positonString + ')');
     }
   });
 
@@ -97,6 +106,8 @@ io.sockets.on('connection', function(socket) {
     {
 	  nightMode = objectData;
       socket.broadcast.emit('nightMode', objectData);
+      var mode = (objectData) ? 'Night Mode' : 'Day Mode';
+      io.sockets.emit('serverNotification', 'Switched to ' + mode);
     }
   });
 
@@ -106,11 +117,13 @@ io.sockets.on('connection', function(socket) {
       socket.broadcast.emit('requestObjects', objectList);
     }
   });
+
   socket.on('deleteObject', function(objectID){
       if (socket.username === activeUserName)
       {
           var deleted = deleteObject(objectID);
           socket.broadcast.emit('objectDeleted', deleted);
+          // TODO: braodcast server notification
       }
   });
 
@@ -143,6 +156,7 @@ io.sockets.on('connection', function(socket) {
     if (index >= 0) {
       userQueue.splice(index, 1);
     }
+    io.sockets.emit('serverNotification', wrapUsername(socket.username) + ' has left.');
     grantControl({username: userQueue[0]});
     userListChanged();
   });
