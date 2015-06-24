@@ -6,9 +6,9 @@ function startClient() {
   hasControl = false;
   if (requestName()) {
       connectToServer();
-      
+
     $("#notifications").empty();
-    $("#notifications").append(getTimestamp() +' Logged in as <b><u>' + name + '</u></b>');
+    $("#notifications").append('<div>' + getTimestamp() +' Logged in as <b><u>' + name + '</u></b></div>');
   }
 }
 
@@ -18,6 +18,10 @@ function connectToServer() {
   socket.on('connect', function() {
     // serverside call
     socket.emit('adduser', name);
+  });
+
+  socket.on('serverNotification', function(message) {
+    $("#notifications").append('<div>' + getTimestamp() +' ' + message + '</div>');
   });
 
   socket.on('updateusers', function (users, activeUserName) {
@@ -44,20 +48,20 @@ function connectToServer() {
 
   socket.on('cameraUpdate', function(data) {
     onCameraUpdate(data);
-  });  
+  });
 
   socket.on('requestCamera', function() {
     sendUpdatedCameraInformation(getCameraData());
   });
- 
+
   socket.on('objectCreated', function(data) {
     onObjectCreate(data);
   });
-  
+
   socket.on('requestObjects', function(objects) {
     onObjectListCreate(objects);
   });
-  
+
   socket.on('nightMode', function(bool){
 	updateNightMode(bool);
   });
