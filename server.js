@@ -68,9 +68,9 @@ io.sockets.on('connection', function(socket) {
       }
 
       userListChanged();
-	  socket.emit('requestObjects',objectList);
+	  socket.emit('requestObjects', objectList);
       io.sockets.emit('requestCamera');
-	  socket.emit('nightMode',nightMode);
+	  socket.emit('nightMode', nightMode);
     }
   });
 
@@ -82,7 +82,7 @@ io.sockets.on('connection', function(socket) {
       grantControl( {username: targetUsername} );
     }
 	});
-	
+
   socket.on('objectCreated', function(objectData){
     if (socket.username === activeUserName)
     {
@@ -91,7 +91,7 @@ io.sockets.on('connection', function(socket) {
       //socket.broadcast.emit('objectCreated', objectData);
     }
   });
-  
+
   socket.on('nightMode', function(objectData){
     if (socket.username === activeUserName)
     {
@@ -161,4 +161,3 @@ function deleteObject(objectID) {
         return false;
     }
 }
-
