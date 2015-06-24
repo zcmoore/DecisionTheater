@@ -20,6 +20,10 @@ function connectToServer() {
     socket.emit('adduser', name);
   });
 
+  socket.on('serverNotification', function(message) {
+    $("#notifications").append('<div>' + getTimestamp() +' ' + message + '</div>');
+  });
+
   socket.on('updateusers', function (users, activeUserName) {
     $('#users').empty();
     $.each(users, function(username, value) {
