@@ -54,6 +54,10 @@ function connectToServer() {
     onObjectCreate(data);
   });
   
+  socket.on('objectDelete', function(id) {
+    deleteObjectByID(id);
+  });
+  
   socket.on('requestObjects', function(objects) {
     onObjectListCreate(objects);
   });
@@ -97,6 +101,10 @@ function sendUpdatedCameraInformation(cameraData) {
 
 function sendObjectCreation(object){
   socket.emit('objectCreated',object);
+}
+
+function sendDeletionNotice(id){
+  socket.emit('deleteid',id);
 }
 
 function sendUpdateLightMode(bool){

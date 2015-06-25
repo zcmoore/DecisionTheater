@@ -12,10 +12,9 @@ var usernames = {};
 var activeSocket = null;
 var userQueue = [];
 var activeUserName;
-var objectList;
 var viewingMode = false;
 var nightMode = false;
-var objectList=[];
+var objectList={};
 var messageList = [];
 var lastCameraMessage = null;
 
@@ -88,7 +87,14 @@ io.sockets.on('connection', function(socket) {
     {
       createObject(objectData);
 	  io.sockets.emit('objectCreated', objectData);
-      //socket.broadcast.emit('objectCreated', objectData);
+    }
+  });
+  
+  socket.on('deleteid', function(id){
+    if (socket.username === activeUserName)
+    {
+      deleteObject(id);
+	  io.sockets.emit('objectDelete', id);
     }
   });
   
@@ -150,7 +156,8 @@ io.sockets.on('connection', function(socket) {
 
 function createObject(objectData) {
     var date = new Date();
-    objectList[date.getTime] = objectData;
+	objectData.id = date.getTime();
+    objectList[objectData.id] = objectData;
 }
 
 function deleteObject(objectID) {

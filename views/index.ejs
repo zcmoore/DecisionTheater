@@ -10,8 +10,6 @@
   <script type="text/javascript" src="../public/lib/bootstrap.js"></script>  
   <link rel="stylesheet" href="../public/app.css" />
   
-  <script type="text/javascript" src="../public/models/smallcityroadWaypoints.js"></script>
-
   <script type="text/javascript" src="../public/lib/three.min.js"></script>
   <script type="text/javascript" src="../public/lib/Coordinates.js"></script>
   <script type="text/javascript" src="../public/lib/OrbitControls.js"></script>
@@ -125,8 +123,10 @@
 			changeNightMode(false);
 		});
 		$("#Add").click(function(){
+			showAddablePlaces();
 		});
 		$("#Delete").click(function(){
+			deleteSelectedObject();
 		});
 		$("#menu").click(function(){
 			$(".col-md-4").collapse("toggle");
