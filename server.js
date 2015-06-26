@@ -18,7 +18,7 @@ var objectList={};
 var messageList = [];
 var lastCameraMessage = null;
 
-server.listen(process.env.PORT || 8080);
+server.listen(process.env.PORT || 80);
 
 app.set('view engine', 'ejs');
 app.set('view options', {
