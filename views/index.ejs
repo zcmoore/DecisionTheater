@@ -7,9 +7,9 @@
   <script type="text/javascript" src="../public/lib/jquery-1.11.3.min.js"></script>
   <script src="../../socket.io/socket.io.js"></script>
   <link rel="stylesheet" href="../public/lib/bootstrap.css" />
-  <script type="text/javascript" src="../public/lib/bootstrap.js"></script>  
+  <script type="text/javascript" src="../public/lib/bootstrap.js"></script>
   <link rel="stylesheet" href="../public/app.css" />
-  
+
   <script type="text/javascript" src="../public/models/smallcityroadWaypoints.js"></script>
 
   <script type="text/javascript" src="../public/lib/three.min.js"></script>
@@ -38,7 +38,7 @@
       </div>
     </div>
     <!-- /Nav Bar  -->
-	
+
     <div class="container" id="dashboard">
       <div class="row" />
 		<div class="col-md-8">
@@ -57,7 +57,7 @@
           <hr />
 		  <b>Menu</b>
 		  <div id="menu"></div>
-		  Mode: 
+		  Mode:
 		  <button type="button" id = "viewMode" class="btn btn-primary">Viewing</button>
 		  <button type="button" id = "editMode" class="btn btn-success">Editing</button>
 		  <div id="viewing" class = "collapse">
@@ -75,15 +75,15 @@
 		  <hr/>
 		  <details>
 				<summary>Show Notifications</summary>
-				<nav>
-					<div id="notifications" style="text-align: center;"></div>
-				</nav>
+				<div>
+					<div id="notifications" style="text-align: left;"></div>
+				</div>
 	      </details>
           <hr/>
 		  <div class="clear"></div>
 		</div>
 		</div>
-		
+
         <!-- /User List  -->
       </div>
     </div>
@@ -96,19 +96,19 @@
     <p>Name required to enter Decision Theatre</p>
   </div>
   <!-- /Invalid Login Panel  -->
-  
+
   <script>
 
-  $(document).ready(function(){ 
+  $(document).ready(function(){
     $('#validLogin').hide();
     $('#invalidLogin').hide();
-	
+
     startRenderApp();
     startClient();
     onWindowResize();
 	$("#viewing").collapse("hide");
 	$("#editing").collapse("show");
-	
+
 	$(document).ready(function(){
 		$("#viewMode").click(function(){
 			$("#viewing").collapse("show");

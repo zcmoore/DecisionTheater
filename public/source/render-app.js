@@ -64,7 +64,7 @@ function onCameraUpdate(cameraData) {
 function onObjectCreate(objectData) {
 	loader.load(
 	'public/models/light/lampJoint.js',
-	
+
 	function ( geometry, materials ) {
 		var material = new THREE.MeshFaceMaterial( materials );
 		var lamp = new THREE.SkinnedMesh( geometry, material );
@@ -95,7 +95,7 @@ function onObjectCreate(objectData) {
 }
 
 function onObjectListCreate(objectList) {
-	for (i = 0; i < objectList.length; i++) { 
+	for (i = 0; i < objectList.length; i++) {
 		onObjectCreate(objectList[i]);
 	}
 }
@@ -123,7 +123,7 @@ function turnNightOn(){
 	light.intensity = 0.0;
 	light2.intensity = 0.0;
 	nightMode = true;
-	for (i = 0; i < lampLights.length; i++) { 
+	for (i = 0; i < lampLights.length; i++) {
 		lampLights[i].intensity = 0.8;
 	}
 }
@@ -132,7 +132,7 @@ function turnNightOff(){
 	light.intensity = 1.0;
 	light2.intensity = 1.0;
 	nightMode = false;
-	for (i = 0; i < lampLights.length; i++) { 
+	for (i = 0; i < lampLights.length; i++) {
 		lampLights[i].intensity = 0.0;
 	}
 }
@@ -161,13 +161,13 @@ function onMouseMove( event ) {
 		if (oldX != mouseX && oldY != mouseY){
 			var xAdjust = $('#jsviewport').offset().left;
 			var yAdjust = $('#jsviewport').offset().top;
-			
+
 			var newX = mouseX-xAdjust;
 			var newY = mouseY-yAdjust;
-			
+
 			mouse.x = ( newX / canvasWidth ) * 2 - 1;
 			mouse.y = - ( newY / canvasHeight ) * 2 + 1;
-			mouseMoved = true;	
+			mouseMoved = true;
 		}
 	}
 
@@ -183,7 +183,7 @@ function onDocumentMouseUp( event ) {
 	if (hasControl){
 		if (mouse.x <= 1 && mouse.x >=-1 && mouse.y <= 1 && mouse.y >=-1 && event.button == 0 && mouseMoved == false){
 			var raycaster = new THREE.Raycaster();
-			raycaster.setFromCamera( mouse, camera );	
+			raycaster.setFromCamera( mouse, camera );
 
 			var intersects = raycaster.intersectObject(city);
 
@@ -192,7 +192,7 @@ function onDocumentMouseUp( event ) {
 				//console.log("intersected at x: " + pos.x + " y: " + pos.y + " z: " + pos.z );
 				/*loader.load(
 				'public/models/light/lampJoint.js',
-				
+
 				function ( geometry, materials ) {
 					var material = new THREE.MeshFaceMaterial( materials );
 					var lamp = new THREE.SkinnedMesh( geometry, material );
@@ -223,7 +223,7 @@ function onDocumentMouseUp( event ) {
 					pos_y: pos.y,
 					pos_z: pos.z
 				};
-				
+
 				sendObjectCreation(objectData);
 			}
 		}
