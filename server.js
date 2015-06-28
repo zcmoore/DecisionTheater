@@ -12,10 +12,9 @@ var usernames = {};
 var activeSocket = null;
 var userQueue = [];
 var activeUserName;
-var objectList;
 var viewingMode = false;
 var nightMode = false;
-var objectList=[];
+var objectList={};
 var messageList = [];
 var lastCameraMessage = null;
 
@@ -37,7 +36,13 @@ app.get('/', function(req, res) {
 function grantControl(socket) {
   activeUserName = socket.username;
   io.sockets.emit('controlgrant', socket.username);
+  io.sockets.emit('serverNotification', 'Control given to ' + wrapUsername(socket.username));
   userListChanged();
+}
+
+function wrapUsername(username)
+{
+    return '<b><u>' + username + '</u></b>';
 }
 
 function userListChanged() {
@@ -68,9 +73,10 @@ io.sockets.on('connection', function(socket) {
       }
 
       userListChanged();
-	  socket.emit('requestObjects',objectList);
+	  socket.emit('requestObjects', objectList);
       io.sockets.emit('requestCamera');
-	  socket.emit('nightMode',nightMode);
+	  socket.emit('nightMode', nightMode);
+      socket.broadcast.emit('serverNotification', wrapUsername(username) + ' has joined.');
     }
   });
 
@@ -82,21 +88,33 @@ io.sockets.on('connection', function(socket) {
       grantControl( {username: targetUsername} );
     }
 	});
-	
+
   socket.on('objectCreated', function(objectData){
     if (socket.username === activeUserName)
     {
       createObject(objectData);
 	  io.sockets.emit('objectCreated', objectData);
       //socket.broadcast.emit('objectCreated', objectData);
+      var positonString = objectData.pos_x.toFixed(2) + ', ' + objectData.pos_y.toFixed(2) + ', ' + objectData.pos_z.toFixed(2);
+      io.sockets.emit('serverNotification', 'Object created at (' + positonString + ')');
     }
   });
   
+  socket.on('deleteid', function(id){
+    if (socket.username === activeUserName)
+    {
+      deleteObject(id);
+	  io.sockets.emit('objectDelete', id);
+    }
+  });
+
   socket.on('nightMode', function(objectData){
     if (socket.username === activeUserName)
     {
 	  nightMode = objectData;
       socket.broadcast.emit('nightMode', objectData);
+      var mode = (objectData) ? 'Night Mode' : 'Day Mode';
+      io.sockets.emit('serverNotification', 'Switched to ' + mode);
     }
   });
 
@@ -106,11 +124,13 @@ io.sockets.on('connection', function(socket) {
       socket.broadcast.emit('requestObjects', objectList);
     }
   });
+
   socket.on('deleteObject', function(objectID){
       if (socket.username === activeUserName)
       {
           var deleted = deleteObject(objectID);
           socket.broadcast.emit('objectDeleted', deleted);
+          // TODO: braodcast server notification
       }
   });
 
@@ -143,6 +163,7 @@ io.sockets.on('connection', function(socket) {
     if (index >= 0) {
       userQueue.splice(index, 1);
     }
+    io.sockets.emit('serverNotification', wrapUsername(socket.username) + ' has left.');
     grantControl({username: userQueue[0]});
     userListChanged();
   });
@@ -150,7 +171,8 @@ io.sockets.on('connection', function(socket) {
 
 function createObject(objectData) {
     var date = new Date();
-    objectList[date.getTime] = objectData;
+	objectData.id = date.getTime();
+    objectList[objectData.id] = objectData;
 }
 
 function deleteObject(objectID) {
@@ -161,4 +183,3 @@ function deleteObject(objectID) {
         return false;
     }
 }
-
