@@ -22,6 +22,9 @@ var selectedObject;
 var addableLampMesh;
 var objectControl;
 var transforming;
+var meshToAdd;
+var raycaster;
+var inUI = false;
 
 var Modes = Object.freeze({
 	EDIT: 		0,
@@ -199,6 +202,18 @@ function showAddablePlaces(){
 			adding = true;
 			break;
 		case Modes.ADDANY:
+			if(!meshToAdd){
+				loader.load(
+				'public/models/light/lampJoint.js',
+				
+				function ( geometry, materials ) {
+					var material = new THREE.MeshFaceMaterial( materials );
+					var mesh = new THREE.SkinnedMesh( geometry, material );
+					scene.add(mesh);
+					meshToAdd = mesh;
+				}
+				);
+			}
 			break;
 	}
 }
@@ -214,19 +229,14 @@ function onMouseMove( event ) {
 	if (hasControl){
 		// calculate mouse position in normalized device coordinates
 		// (-1 to +1) for both components
+		event.preventDefault();
 		var oldX = mouseX;
 		var oldY = mouseY;
 		mouseX = event.clientX;
 		mouseY = event.clientY;
 		if (oldX != mouseX && oldY != mouseY){
-			var xAdjust = $('#jsviewport').offset().left;
-			var yAdjust = $('#jsviewport').offset().top;
-			
-			var newX = mouseX-xAdjust;
-			var newY = mouseY-yAdjust;
-			
-			mouse.x = ( newX / canvasWidth ) * 2 - 1;
-			mouse.y = - ( newY / canvasHeight ) * 2 + 1;
+			mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+			mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 			mouseMoved = true;	
 		}
 	}
@@ -294,8 +304,11 @@ function switchModes(mode){
 		case Modes.VIEW:
 		break;
 		case Modes.ADD:
+			$("#objectlist").collapse("hide");
+			hideAddablePlaces();
 		break;
 		case Modes.ADDANY:
+			$("#objectlist").collapse("hide");
 		break;
 		case Modes.TRANSFORM:
 			deselectCurrentObject();
@@ -308,8 +321,10 @@ function switchModes(mode){
 		case Modes.VIEW:
 		break;
 		case Modes.ADD:
+			$("#objectlist").collapse("show");
 		break;
 		case Modes.ADDANY:
+			$("#objectlist").collapse("show");
 		break;
 		case Modes.TRANSFORM:
 		break;
@@ -321,15 +336,14 @@ function cancelCurrentAction(){
 }
 
 function onDocumentMouseUp( event ) {
-	if (hasControl && mouse.x <= 1 && mouse.x >=-1 && mouse.y <= 1 && mouse.y >=-1 && event.button == 0){
+	if (hasControl && mouse.x <= 1 && mouse.x >=-1 && mouse.y <= 1 && mouse.y >=-1 && event.button == 0 && !inUI){
 		if (currentMode == Modes.ADD && mouseMoved == false){
-			var raycaster = new THREE.Raycaster();
+			raycaster = new THREE.Raycaster();
 			raycaster.setFromCamera( mouse, camera );	
 
 			var intersects = raycaster.intersectObjects(addablePlaces);
 
 			if (intersects.length > 0){
-				$("#objectlist").collapse("toggle");
 				var obj = intersects[0].object;	
 				scene.remove(obj);
 				for(i = 0; i < addablePlaces.length; i++) {
@@ -366,31 +380,30 @@ function onDocumentMouseUp( event ) {
 				switchModes(Modes.TRANSFORM);
 			}
 		}
-		else if (currentMode == Modes.ADDANY){
+		else if (currentMode == Modes.ADDANY && mouseMoved == false){
+			console.log(mouseMoved = false);
 			var raycaster = new THREE.Raycaster();
 			raycaster.setFromCamera( mouse, camera );	
 
 			var intersects = raycaster.intersectObject(city);
 
 			if (intersects.length > 0){
-				$("#objectlist").collapse("toggle");
-				var obj = intersects[0].object;	
-				scene.remove(obj);
-				for(i = 0; i < addablePlaces.length; i++) {
-				}
+				var pos = intersects[0].point;
+				
 				var objectData = {
 					id: "-1",
-					pos_x: obj.position.x,
-					pos_y: obj.position.y,
-					pos_z: obj.position.z,
-					rot_x: obj.rotation.x,
-					rot_y: obj.rotation.y,
-					rot_z: obj.rotation.z					
+					pos_x: pos.x,
+					pos_y: pos.y,
+					pos_z: pos.z,
+					rot_x: 0,
+					rot_y: 0,
+					rot_z: 0					
 				};
-				hideAddablePlaces();
 				sendObjectCreation(objectData);
 				switchModes(Modes.EDIT);
 			}
+			scene.remove(meshToAdd);
+			meshToAdd = null;
 			
 		}
 	}
@@ -416,6 +429,8 @@ function init() {
   cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
   camera.position.set(-480, 659, -619);
   cameraControls.target.set(4, 301, 92);
+  
+  raycaster = new THREE.Raycaster();
 
   // SCENE
   fillScene();
@@ -491,6 +506,15 @@ function render() {
 	cameraControls.enabled = false;
 	objectControl.update();
   }
+  if (currentMode == Modes.ADDANY && meshToAdd){
+	raycaster.setFromCamera( mouse, camera );
+	var intersection = raycaster.intersectObject(city);
+	if (intersection.length > 0){
+		meshToAdd.position.x = intersection[0].point.x;
+		meshToAdd.position.y = intersection[0].point.y;
+		meshToAdd.position.z = intersection[0].point.z;
+	}
+  }
   if (hasControl){
     updateCamera();
   }
@@ -527,11 +551,9 @@ function bindUIFunctionality(){
 			changeNightMode(false);
 		});
 		$("#Add").click(function(){
-			$("#objectlist").collapse("toggle");
 			switchModes(Modes.ADD);
 		});
 		$("#AddAny").click(function(){
-			$("#objectlist").collapse("toggle");
 			switchModes(Modes.ADDANY);
 		});
 		$("#lampbtn").click(function(){
@@ -557,6 +579,12 @@ function bindUIFunctionality(){
 		});
 		$("#Rotate").click(function(){
 			objectControl.setMode("rotate");
+		});
+		$(".col-md-4").mouseover(function(){
+			inUI = true;
+		});
+		$(".col-md-4").mouseout(function(){
+			inUI = false;
 		});
 	});
 }
