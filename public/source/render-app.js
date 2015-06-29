@@ -19,8 +19,18 @@ var lightPlaces = [];
 var addablePlaces = [];
 var adding = false;
 var selectedObject;
-var oldMaterial;
 var addableLampMesh;
+var objectControl;
+var transforming;
+
+var Modes = Object.freeze({
+	EDIT: 		0,
+	VIEW: 		1,
+	ADD: 		2,
+	ADDANY: 	3,
+	TRANSFORM: 	4
+	});
+var currentMode = Modes.EDIT;
 
 function getCameraData()
 {
@@ -80,6 +90,9 @@ function onObjectCreate(objectData) {
 		lamp.position.setX(objectData.pos_x);
 		lamp.position.setY(objectData.pos_y);
 		lamp.position.setZ(objectData.pos_z);
+		lamp.rotation.x=objectData.rot_x;
+		lamp.rotation.y=objectData.rot_y;
+		lamp.rotation.z=objectData.rot_z;
 		var objPos = objectData;
 		var bones = lamp.skeleton.bones;
 		var pos = bones[0].position;
@@ -90,7 +103,7 @@ function onObjectCreate(objectData) {
 		lamp.serverID=objectData.id;
 		lamps[objectData.id]=lamp;
 		selectableObjects.push(lamp);
-		spotLight.position.set(objPos.pos_x+pos.x,objPos.pos_y+pos.y,objPos.pos_z+pos.z);
+		spotLight.position.set(objPos.pos_x+pos.x,objPos.pos_y+pos.y+10,objPos.pos_z+pos.z);
 		var lightTarget = new THREE.Object3D();
 		lightTarget.position.set(objPos.pos_x+pos.x,objPos.pos_y+pos.y-100,objPos.pos_z+pos.z);
 		spotLight.target = lightTarget;
@@ -165,27 +178,29 @@ function changeNightMode(bool){
 }
 
 function showAddablePlaces(){
-	if (addablePlaces.length == 0){
-		for (i = 0; i < lightPlaces.length; i++) {
-			var pos = lightPlaces[i];
-			var material = new THREE.MeshBasicMaterial( {color: 0x00ffff} );
-			var mesh = new THREE.Mesh(addableLampMesh, material );
-			addablePlaces.push(mesh);
-			mesh.position.set(pos.x,pos.y,pos.z);
-			scene.add(mesh);
-		}
+	switch(currentMode){
+		case Modes.ADD:
+			if (addablePlaces.length == 0){
+				for (i = 0; i < lightPlaces.length; i++) {
+					var pos = lightPlaces[i];
+					var material = new THREE.MeshLambertMaterial( {color: 0x00ffff} );
+					var mesh = new THREE.Mesh(addableLampMesh, material );
+					addablePlaces.push(mesh);
+					mesh.position.set(pos.x,pos.y,pos.z);
+					scene.add(mesh);
+				}
+			}
+			else{
+				for (i = 0; i < addablePlaces.length;i++) {
+					deselectCurrentObject();
+					scene.add(addablePlaces[i]);
+				}
+			}
+			adding = true;
+			break;
+		case Modes.ADDANY:
+			break;
 	}
-	else{
-		for (i = 0; i < addablePlaces.length;i++) {
-			scene.add(addablePlaces[i]);
-		}
-	}
-	adding = true;
-	var geometry = new THREE.SphereGeometry( 10, 32, 32 );
-	var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-	var mesh = new THREE.Mesh( geometry, material );
-	mesh.position.set(lightPlaces[0].x,lightPlaces[0].y,lightPlaces[0].z);
-	//scene.add(mesh);
 }
 
 function hideAddablePlaces(){
@@ -229,8 +244,17 @@ function deleteObjectByID(id){
 		for(i = 0; i < selectableObjects.length; i++) {
 			if(selectableObjects[i] === lamps[id]) {
 			   selectableObjects.splice(i, 1);
+			   break;
 			}
 		}
+		var material = new THREE.MeshLambertMaterial( {color: 0x00ffff} );
+		var mesh = new THREE.Mesh(addableLampMesh, material );
+		addablePlaces.push(mesh);
+		var pos = lamps[id].position;
+		var rot = lamps[id].rotation;
+		mesh.position.set(pos.x,pos.y,pos.z);
+		mesh.rotation.set(rot.x,rot.y,rot.z);
+		addablePlaces.push(mesh);
 		scene.remove(lamps[id]);
 		delete lamps[id];
 		scene.remove(lightList[id]);
@@ -238,23 +262,74 @@ function deleteObjectByID(id){
 	}
 }
 
+function updateObjectByID(objectData){
+	var id = objectData.id;
+	if (id != '-1'){
+		lamps[id].position.set(objectData.pos_x,objectData.pos_y,objectData.pos_z);
+		lamps[id].rotation.set(objectData.rot_x,objectData.rot_y,objectData.rot_z);
+	}
+}
+
+function deselectCurrentObject(){
+	selectedObject = null;
+	objectControl.detach();
+	scene.remove(objectControl);
+}
+
 function deleteSelectedObject(){
 	if (selectedObject){
 		sendDeletionNotice(selectedObject.serverID);
-		//scene.remove(selectedObject);
 		selectedObject = null;
+		objectControl.detach();
+		scene.remove(objectControl);
+		$("#transform").collapse("hide");
+		switchModes(Modes.EDIT);
 	}
+}
+
+function switchModes(mode){
+	switch(currentMode){ //cancel current mode actions/items
+		case Modes.EDIT:
+		break;
+		case Modes.VIEW:
+		break;
+		case Modes.ADD:
+		break;
+		case Modes.ADDANY:
+		break;
+		case Modes.TRANSFORM:
+			deselectCurrentObject();
+		break;
+	}
+	currentMode=mode;
+	switch(currentMode){ // activate new mode and actions
+		case Modes.EDIT:
+		break;
+		case Modes.VIEW:
+		break;
+		case Modes.ADD:
+		break;
+		case Modes.ADDANY:
+		break;
+		case Modes.TRANSFORM:
+		break;
+	}
+}
+
+function cancelCurrentAction(){
+	switchModes(Modes.EDIT);
 }
 
 function onDocumentMouseUp( event ) {
 	if (hasControl && mouse.x <= 1 && mouse.x >=-1 && mouse.y <= 1 && mouse.y >=-1 && event.button == 0){
-		if (adding && mouseMoved == false){
+		if (currentMode == Modes.ADD && mouseMoved == false){
 			var raycaster = new THREE.Raycaster();
 			raycaster.setFromCamera( mouse, camera );	
 
 			var intersects = raycaster.intersectObjects(addablePlaces);
 
 			if (intersects.length > 0){
+				$("#objectlist").collapse("toggle");
 				var obj = intersects[0].object;	
 				scene.remove(obj);
 				for(i = 0; i < addablePlaces.length; i++) {
@@ -266,27 +341,57 @@ function onDocumentMouseUp( event ) {
 					id: "-1",
 					pos_x: obj.position.x,
 					pos_y: obj.position.y,
-					pos_z: obj.position.z
+					pos_z: obj.position.z,
+					rot_x: obj.rotation.x,
+					rot_y: obj.rotation.y,
+					rot_z: obj.rotation.z					
 				};
 				hideAddablePlaces();
 				sendObjectCreation(objectData);
+				switchModes(Modes.EDIT);
 			}
 		}
-		else {
+		else if (currentMode == Modes.EDIT){
 			var raycaster = new THREE.Raycaster();
 			raycaster.setFromCamera( mouse, camera );	
 
 			var intersects = raycaster.intersectObjects(selectableObjects);
 
 			if (intersects.length > 0){
-				if(selectedObject){
-					selectedObject.material = oldMaterial;
-				}
 				var obj = intersects[0].object;	
 				selectedObject = obj;
-				oldMaterial = selectedObject.material;
-				selectedObject.material = new THREE.MeshBasicMaterial( { color: 0x00ff00} );
+				objectControl.attach(selectedObject);
+				scene.add(objectControl);
+				$("#transform").collapse("show");
+				switchModes(Modes.TRANSFORM);
 			}
+		}
+		else if (currentMode == Modes.ADDANY){
+			var raycaster = new THREE.Raycaster();
+			raycaster.setFromCamera( mouse, camera );	
+
+			var intersects = raycaster.intersectObject(city);
+
+			if (intersects.length > 0){
+				$("#objectlist").collapse("toggle");
+				var obj = intersects[0].object;	
+				scene.remove(obj);
+				for(i = 0; i < addablePlaces.length; i++) {
+				}
+				var objectData = {
+					id: "-1",
+					pos_x: obj.position.x,
+					pos_y: obj.position.y,
+					pos_z: obj.position.z,
+					rot_x: obj.rotation.x,
+					rot_y: obj.rotation.y,
+					rot_z: obj.rotation.z					
+				};
+				hideAddablePlaces();
+				sendObjectCreation(objectData);
+				switchModes(Modes.EDIT);
+			}
+			
 		}
 	}
 }
@@ -315,7 +420,13 @@ function init() {
   // SCENE
   fillScene();
   addToDOM();
+  
+  objectControl = new THREE.TransformControls( camera, renderer.domElement );
+  objectControl.addEventListener( 'change', render );
+  
+
   render();
+  
   
 }
 
@@ -324,7 +435,7 @@ function fillScene() {
   scene = new THREE.Scene();
   scene.fog = new THREE.Fog(0x808080, 3000, 6000);
   // LIGHTS
-  ambientLight = new THREE.AmbientLight(0x050505);
+  ambientLight = new THREE.AmbientLight(0x030303);
   light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
   light.position.set(200, 400, 500);
 
@@ -369,17 +480,20 @@ function addToDOM() {
   window.addEventListener('resize', onWindowResize, false);
 }
 
-function animate() {
-  requestAnimationFrame(animate);
-  render();
-}
-
 function render() {
   requestAnimationFrame(render);
   var delta = clock.getDelta();
-  cameraControls.enabled = hasControl;
-  cameraControls.update(delta);
-  updateCamera();
+  if (currentMode != Modes.TRANSFORM){
+	cameraControls.enabled = hasControl;
+    cameraControls.update(delta);
+  }
+  else{
+	cameraControls.enabled = false;
+	objectControl.update();
+  }
+  if (hasControl){
+    updateCamera();
+  }
   renderer.render(scene, camera);
 }
 
@@ -391,4 +505,58 @@ function startRenderApp() {
     var errorReport = "Your program encountered an unrecoverable error, can not draw on canvas. Error was:<br/><br/>";
     $('#container').append(errorReport + e);
   }
+}
+
+function bindUIFunctionality(){
+	$("#viewing").collapse("hide");
+	$("#editing").collapse("show");
+
+	$(document).ready(function(){
+		$("#viewMode").click(function(){
+			$("#viewing").collapse("show");
+			$("#editing").collapse("hide");
+		});
+		$("#editMode").click(function(){
+			$("#viewing").collapse("hide");
+			$("#editing").collapse("show");
+		});
+		$("#nightOn").click(function(){
+			changeNightMode(true);
+		});
+		$("#nightOff").click(function(){
+			changeNightMode(false);
+		});
+		$("#Add").click(function(){
+			$("#objectlist").collapse("toggle");
+			switchModes(Modes.ADD);
+		});
+		$("#AddAny").click(function(){
+			$("#objectlist").collapse("toggle");
+			switchModes(Modes.ADDANY);
+		});
+		$("#lampbtn").click(function(){
+			showAddablePlaces();
+		});
+		$("#Delete").click(function(){
+			deleteSelectedObject();
+		});
+		$("#Cancel").click(function(){
+			cancelCurrentAction();
+		});
+		$("#menu").click(function(){
+			$(".col-md-4").collapse("toggle");
+			if (hasControl){
+				$("#menudiv").collapse("show");
+			}
+		});
+		$("#notebutton").click(function(){
+			$("#notifications").collapse("toggle");
+		});
+		$("#Translate").click(function(){
+			objectControl.setMode("translate");
+		});
+		$("#Rotate").click(function(){
+			objectControl.setMode("rotate");
+		});
+	});
 }

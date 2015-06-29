@@ -14,6 +14,7 @@
   <script type="text/javascript" src="../public/lib/three.min.js"></script>
   <script type="text/javascript" src="../public/lib/Coordinates.js"></script>
   <script type="text/javascript" src="../public/lib/OrbitControls.js"></script>
+  <script type="text/javascript" src="../public/lib/TransformControls.js"></script>
   <script type="text/javascript" src="../public/lib/dat.gui.min.js"></script>
 
   <script type="text/javascript" src="../public/lib/stats.min.js"></script>
@@ -29,13 +30,6 @@
 
 <body>
   <div id="validLogin" class="innerbody">
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <a class="navbar-brand">Decision Theatre Dashboard</a>
-        </div>
-      </div>
-    </div>
     <!-- /Nav Bar  -->
 
     <div class="container" id="dashboard">
@@ -53,33 +47,57 @@
           <b>Users</b>
           <hr />
           <div id="users"></div>
-          <hr />
-		  <b>Menu</b>
-		  <div id="menu"></div>
-		  Mode:
-		  <button type="button" id = "viewMode" class="btn btn-primary">Viewing</button>
-		  <button type="button" id = "editMode" class="btn btn-success">Editing</button>
-		  <div id="viewing" class = "collapse">
-		  Viewing Options
-		  </br>
-		  <button type="button" id = "nightOn" class="btn btn-primary">Night Mode</button>
-		  <button type="button" id = "nightOff" class="btn btn-success">Day Mode</button>
-		  </div>
-		  <div id="editing">
-		  Editing Options
-		  </br>
-		  <button type="button" id = "Add" class="btn btn-primary">Add an Object</button>
-		  <button type="button" id = "Delete" class="btn btn-success">Delete Object</button>
+		  <div id="menudiv" class = "collapse">
+		  <hr />
+			  Mode:
+			  <div class="btn-group" role="group" aria-label="modegroup">
+				<button type="button" id = "viewMode" class="btn btn-primary" data-toggle="button" aria-pressed="false" autocomplete="off">Viewing</button>
+				<button type="button" id = "editMode" class="btn btn-success active" data-toggle="button" aria-pressed="true" autocomplete="off">Editing</button>
+			  </div>
+			  <div id="viewing" class = "collapse">
+			  Viewing Options
+			  </br>
+			  <div class="btn-group" role="group" aria-label="modediv">
+				<button type="button" id = "nightOn" class="btn btn-primary" data-toggle="button" aria-pressed="false" autocomplete="off">Night Mode</button>
+				<button type="button" id = "nightOff" class="btn btn-success active" data-toggle="button" aria-pressed="true" autocomplete="off">Day Mode</button>
+			  </div>
+			  </div>
+			  <div id="editing">
+				  Editing Options
+				  </br>
+				  <div class="btn-group" role="group" aria-label="addremove">
+					<button type="button" id = "Add" class="btn btn-primary">Add Object</button>
+					<button type="button" id = "Delete" class="btn btn-success">Delete Object</button>
+					</br>
+					</br>
+					<button type="button" id = "AddAny" class="btn btn-primary">Add Anywhere</button>
+					<button type="button" id = "Cancel" class="btn btn-warning">Cancel</button>
+				  </div>
+				  <div id="transform" class = "collapse">
+				  Editing Options
+					  </br>
+					  <div class="btn-group" role="group" aria-label="addremove">
+						<button type="button" id = "Translate" class="btn btn-primary">Translate</button>
+						<button type="button" id = "Rotate" class="btn btn-success">Rotate</button>
+					  </div>
+				  </div>
+			  </div>
 		  </div>
 		  <hr/>
-		  <details>
-				<summary>Show Notifications</summary>
-				<div>
-					<div id="notifications" style="text-align: left;"></div>
-				</div>
-	      </details>
-          <hr/>
+		  <nav>
+		    <div id="objectlist" class="collapse" style="text-align: left;margin-bottom:5px">
+				<form>
+					Street Lamp <br/>
+					<image type="image" id="lampbtn" src="../public/models/streetlamp/lamp_btn.png">
+				</form>
+			</div>
+		  </nav>
+		  <button type="button" id = "notebutton" class="btn btn-primary" data-toggle="button" aria-pressed="false" autocomplete="off">Notifications</button>
+		  <nav>
+		    <div id="notifications" class="collapse" style="text-align: left;margin-top:5px"></div>
+		  </nav>
 		  <div class="clear"></div>
+		  <hr/>
 		</div>
 		</div>
 
@@ -105,34 +123,8 @@
     startRenderApp();
     startClient();
     onWindowResize();
-	$("#viewing").collapse("hide");
-	$("#editing").collapse("show");
-
-	$(document).ready(function(){
-		$("#viewMode").click(function(){
-			$("#viewing").collapse("show");
-			$("#editing").collapse("hide");
-		});
-		$("#editMode").click(function(){
-			$("#viewing").collapse("hide");
-			$("#editing").collapse("show");
-		});
-		$("#nightOn").click(function(){
-			changeNightMode(true);
-		});
-		$("#nightOff").click(function(){
-			changeNightMode(false);
-		});
-		$("#Add").click(function(){
-			showAddablePlaces();
-		});
-		$("#Delete").click(function(){
-			deleteSelectedObject();
-		});
-		$("#menu").click(function(){
-			$(".col-md-4").collapse("toggle");
-		});
-	});
+	bindUIFunctionality();
+	
 	});
   </script>
 </body>
