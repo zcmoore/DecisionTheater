@@ -68,6 +68,10 @@ function connectToServer() {
     deleteObjectByID(id);
   });
   
+  socket.on('objectUpdate', function(data) {
+    updateObjectByID(data);
+  });
+  
   socket.on('requestObjects', function(objects) {
     onObjectListCreate(objects);
   });
@@ -115,6 +119,10 @@ function sendObjectCreation(object){
 
 function sendDeletionNotice(id){
   socket.emit('deleteid',id);
+}
+
+function sendObjectUpdate(object){
+  socket.emit('objectUpdate',object);
 }
 
 function sendUpdateLightMode(bool){

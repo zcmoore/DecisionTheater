@@ -133,6 +133,14 @@ io.sockets.on('connection', function(socket) {
           // TODO: braodcast server notification
       }
   });
+  
+    socket.on('objectUpdate', function(object){
+      if (socket.username === activeUserName)
+      {
+          updateObject(object);
+          socket.broadcast.emit('objectUpdate', object);
+      }
+  });
 
   socket.on('cameraUpdate', function(cameraData) {
     if (socket.username === activeUserName) {
@@ -181,5 +189,11 @@ function deleteObject(objectID) {
         return true;
     } else {
         return false;
+    }
+}
+
+function updateObject(objectData) {
+    if (objectData.id in objectList) {
+        objectList[objectData.id] = objectData;
     }
 }

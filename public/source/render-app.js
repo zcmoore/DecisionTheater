@@ -19,7 +19,6 @@ var lightPlaces = [];
 var addablePlaces = [];
 var adding = false;
 var selectedObject;
-var oldMaterial;
 var addableLampMesh;
 var objectControl;
 
@@ -81,6 +80,9 @@ function onObjectCreate(objectData) {
 		lamp.position.setX(objectData.pos_x);
 		lamp.position.setY(objectData.pos_y);
 		lamp.position.setZ(objectData.pos_z);
+		lamp.rotation.x=objectData.rot_x;
+		lamp.rotation.y=objectData.rot_y;
+		lamp.rotation.z=objectData.rot_z;
 		var objPos = objectData;
 		var bones = lamp.skeleton.bones;
 		var pos = bones[0].position;
@@ -91,7 +93,7 @@ function onObjectCreate(objectData) {
 		lamp.serverID=objectData.id;
 		lamps[objectData.id]=lamp;
 		selectableObjects.push(lamp);
-		spotLight.position.set(objPos.pos_x+pos.x,objPos.pos_y+pos.y,objPos.pos_z+pos.z);
+		spotLight.position.set(objPos.pos_x+pos.x,objPos.pos_y+pos.y+10,objPos.pos_z+pos.z);
 		var lightTarget = new THREE.Object3D();
 		lightTarget.position.set(objPos.pos_x+pos.x,objPos.pos_y+pos.y-100,objPos.pos_z+pos.z);
 		spotLight.target = lightTarget;
@@ -169,7 +171,7 @@ function showAddablePlaces(){
 	if (addablePlaces.length == 0){
 		for (i = 0; i < lightPlaces.length; i++) {
 			var pos = lightPlaces[i];
-			var material = new THREE.MeshBasicMaterial( {color: 0x00ffff} );
+			var material = new THREE.MeshLambertMaterial( {color: 0x0000ff} );
 			var mesh = new THREE.Mesh(addableLampMesh, material );
 			addablePlaces.push(mesh);
 			mesh.position.set(pos.x,pos.y,pos.z);
@@ -182,11 +184,6 @@ function showAddablePlaces(){
 		}
 	}
 	adding = true;
-	var geometry = new THREE.SphereGeometry( 10, 32, 32 );
-	var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-	var mesh = new THREE.Mesh( geometry, material );
-	mesh.position.set(lightPlaces[0].x,lightPlaces[0].y,lightPlaces[0].z);
-	//scene.add(mesh);
 }
 
 function hideAddablePlaces(){
@@ -230,8 +227,17 @@ function deleteObjectByID(id){
 		for(i = 0; i < selectableObjects.length; i++) {
 			if(selectableObjects[i] === lamps[id]) {
 			   selectableObjects.splice(i, 1);
+			   break;
 			}
 		}
+		var material = new THREE.MeshLambertMaterial( {color: 0x0000ff} );
+		var mesh = new THREE.Mesh(addableLampMesh, material );
+		addablePlaces.push(mesh);
+		var pos = lamps[id].position;
+		var rot = lamps[id].rotation;
+		mesh.position.set(pos.x,pos.y,pos.z);
+		mesh.rotation.set(rot.x,rot.y,rot.z);
+		addablePlaces.push(mesh);
 		scene.remove(lamps[id]);
 		delete lamps[id];
 		scene.remove(lightList[id]);
@@ -239,10 +245,17 @@ function deleteObjectByID(id){
 	}
 }
 
+function updateObjectByID(objectData){
+	var id = objectData.id;
+	if (id != '-1'){
+		lamps[id].position.set(objectData.pos_x,objectData.pos_y,objectData.pos_z);
+		lamps[id].rotation.set(objectData.rot_x,objectData.rot_y,objectData.rot_z);
+	}
+}
+
 function deleteSelectedObject(){
 	if (selectedObject){
 		sendDeletionNotice(selectedObject.serverID);
-		//scene.remove(selectedObject);
 		selectedObject = null;
 		objectControl.detach();
 		scene.remove(objectControl);
@@ -271,7 +284,10 @@ function onDocumentMouseUp( event ) {
 					id: "-1",
 					pos_x: obj.position.x,
 					pos_y: obj.position.y,
-					pos_z: obj.position.z
+					pos_z: obj.position.z,
+					rot_x: obj.rotation.x,
+					rot_y: obj.rotation.y,
+					rot_z: obj.rotation.z					
 				};
 				hideAddablePlaces();
 				sendObjectCreation(objectData);
@@ -284,15 +300,9 @@ function onDocumentMouseUp( event ) {
 			var intersects = raycaster.intersectObjects(selectableObjects);
 
 			if (intersects.length > 0){
-				if(selectedObject){
-					selectedObject.material = oldMaterial;
-				}
 				var obj = intersects[0].object;	
 				selectedObject = obj;
-				oldMaterial = selectedObject.material;
-				selectedObject.material = new THREE.MeshBasicMaterial( { color: 0x00ff00} );
 				objectControl.attach(selectedObject);
-				objectControl.setSize(2);
 				scene.add(objectControl);
 				$("#transform").collapse("show");
 			}

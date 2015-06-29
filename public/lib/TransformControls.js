@@ -962,6 +962,16 @@
 			scope.update();
 			scope.dispatchEvent( changeEvent );
 			scope.dispatchEvent( objectChangeEvent );
+			var objectData = {
+				id: scope.object.serverID,
+				pos_x: scope.object.position.x,
+				pos_y: scope.object.position.y,
+				pos_z: scope.object.position.z,
+				rot_x: scope.object.rotation.x,
+				rot_y: scope.object.rotation.y,
+				rot_z: scope.object.rotation.z					
+			};
+			sendObjectUpdate(objectData);
 
 		}
 
