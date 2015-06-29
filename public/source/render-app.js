@@ -21,6 +21,16 @@ var adding = false;
 var selectedObject;
 var addableLampMesh;
 var objectControl;
+var transforming;
+
+var Modes = Object.freeze({
+	EDIT: 		0,
+	VIEW: 		1,
+	ADD: 		2,
+	ADDANY: 	3,
+	TRANSFORM: 	4
+	});
+var currentMode = Modes.EDIT;
 
 function getCameraData()
 {
@@ -168,22 +178,29 @@ function changeNightMode(bool){
 }
 
 function showAddablePlaces(){
-	if (addablePlaces.length == 0){
-		for (i = 0; i < lightPlaces.length; i++) {
-			var pos = lightPlaces[i];
-			var material = new THREE.MeshLambertMaterial( {color: 0x0000ff} );
-			var mesh = new THREE.Mesh(addableLampMesh, material );
-			addablePlaces.push(mesh);
-			mesh.position.set(pos.x,pos.y,pos.z);
-			scene.add(mesh);
-		}
+	switch(currentMode){
+		case Modes.ADD:
+			if (addablePlaces.length == 0){
+				for (i = 0; i < lightPlaces.length; i++) {
+					var pos = lightPlaces[i];
+					var material = new THREE.MeshLambertMaterial( {color: 0x00ffff} );
+					var mesh = new THREE.Mesh(addableLampMesh, material );
+					addablePlaces.push(mesh);
+					mesh.position.set(pos.x,pos.y,pos.z);
+					scene.add(mesh);
+				}
+			}
+			else{
+				for (i = 0; i < addablePlaces.length;i++) {
+					deselectCurrentObject();
+					scene.add(addablePlaces[i]);
+				}
+			}
+			adding = true;
+			break;
+		case Modes.ADDANY:
+			break;
 	}
-	else{
-		for (i = 0; i < addablePlaces.length;i++) {
-			scene.add(addablePlaces[i]);
-		}
-	}
-	adding = true;
 }
 
 function hideAddablePlaces(){
@@ -230,7 +247,7 @@ function deleteObjectByID(id){
 			   break;
 			}
 		}
-		var material = new THREE.MeshLambertMaterial( {color: 0x0000ff} );
+		var material = new THREE.MeshLambertMaterial( {color: 0x00ffff} );
 		var mesh = new THREE.Mesh(addableLampMesh, material );
 		addablePlaces.push(mesh);
 		var pos = lamps[id].position;
@@ -253,6 +270,12 @@ function updateObjectByID(objectData){
 	}
 }
 
+function deselectCurrentObject(){
+	selectedObject = null;
+	objectControl.detach();
+	scene.remove(objectControl);
+}
+
 function deleteSelectedObject(){
 	if (selectedObject){
 		sendDeletionNotice(selectedObject.serverID);
@@ -260,12 +283,46 @@ function deleteSelectedObject(){
 		objectControl.detach();
 		scene.remove(objectControl);
 		$("#transform").collapse("hide");
+		switchModes(Modes.EDIT);
 	}
+}
+
+function switchModes(mode){
+	switch(currentMode){ //cancel current mode actions/items
+		case Modes.EDIT:
+		break;
+		case Modes.VIEW:
+		break;
+		case Modes.ADD:
+		break;
+		case Modes.ADDANY:
+		break;
+		case Modes.TRANSFORM:
+			deselectCurrentObject();
+		break;
+	}
+	currentMode=mode;
+	switch(currentMode){ // activate new mode and actions
+		case Modes.EDIT:
+		break;
+		case Modes.VIEW:
+		break;
+		case Modes.ADD:
+		break;
+		case Modes.ADDANY:
+		break;
+		case Modes.TRANSFORM:
+		break;
+	}
+}
+
+function cancelCurrentAction(){
+	switchModes(Modes.EDIT);
 }
 
 function onDocumentMouseUp( event ) {
 	if (hasControl && mouse.x <= 1 && mouse.x >=-1 && mouse.y <= 1 && mouse.y >=-1 && event.button == 0){
-		if (adding && mouseMoved == false){
+		if (currentMode == Modes.ADD && mouseMoved == false){
 			var raycaster = new THREE.Raycaster();
 			raycaster.setFromCamera( mouse, camera );	
 
@@ -291,9 +348,10 @@ function onDocumentMouseUp( event ) {
 				};
 				hideAddablePlaces();
 				sendObjectCreation(objectData);
+				switchModes(Modes.EDIT);
 			}
 		}
-		else {
+		else if (currentMode == Modes.EDIT){
 			var raycaster = new THREE.Raycaster();
 			raycaster.setFromCamera( mouse, camera );	
 
@@ -305,7 +363,35 @@ function onDocumentMouseUp( event ) {
 				objectControl.attach(selectedObject);
 				scene.add(objectControl);
 				$("#transform").collapse("show");
+				switchModes(Modes.TRANSFORM);
 			}
+		}
+		else if (currentMode == Modes.ADDANY){
+			var raycaster = new THREE.Raycaster();
+			raycaster.setFromCamera( mouse, camera );	
+
+			var intersects = raycaster.intersectObject(city);
+
+			if (intersects.length > 0){
+				$("#objectlist").collapse("toggle");
+				var obj = intersects[0].object;	
+				scene.remove(obj);
+				for(i = 0; i < addablePlaces.length; i++) {
+				}
+				var objectData = {
+					id: "-1",
+					pos_x: obj.position.x,
+					pos_y: obj.position.y,
+					pos_z: obj.position.z,
+					rot_x: obj.rotation.x,
+					rot_y: obj.rotation.y,
+					rot_z: obj.rotation.z					
+				};
+				hideAddablePlaces();
+				sendObjectCreation(objectData);
+				switchModes(Modes.EDIT);
+			}
+			
 		}
 	}
 }
@@ -349,7 +435,7 @@ function fillScene() {
   scene = new THREE.Scene();
   scene.fog = new THREE.Fog(0x808080, 3000, 6000);
   // LIGHTS
-  ambientLight = new THREE.AmbientLight(0x050505);
+  ambientLight = new THREE.AmbientLight(0x030303);
   light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
   light.position.set(200, 400, 500);
 
@@ -394,17 +480,20 @@ function addToDOM() {
   window.addEventListener('resize', onWindowResize, false);
 }
 
-function animate() {
-  requestAnimationFrame(animate);
-  render();
-}
-
 function render() {
   requestAnimationFrame(render);
   var delta = clock.getDelta();
-  cameraControls.enabled = hasControl;
-  cameraControls.update(delta);
-  updateCamera();
+  if (currentMode != Modes.TRANSFORM){
+	cameraControls.enabled = hasControl;
+    cameraControls.update(delta);
+  }
+  else{
+	cameraControls.enabled = false;
+	objectControl.update();
+  }
+  if (hasControl){
+    updateCamera();
+  }
   renderer.render(scene, camera);
 }
 
@@ -439,12 +528,20 @@ function bindUIFunctionality(){
 		});
 		$("#Add").click(function(){
 			$("#objectlist").collapse("toggle");
+			switchModes(Modes.ADD);
+		});
+		$("#AddAny").click(function(){
+			$("#objectlist").collapse("toggle");
+			switchModes(Modes.ADDANY);
 		});
 		$("#lampbtn").click(function(){
 			showAddablePlaces();
 		});
 		$("#Delete").click(function(){
 			deleteSelectedObject();
+		});
+		$("#Cancel").click(function(){
+			cancelCurrentAction();
 		});
 		$("#menu").click(function(){
 			$(".col-md-4").collapse("toggle");
