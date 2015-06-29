@@ -44,6 +44,12 @@ function connectToServer() {
 
   socket.on('controlgrant', function(username) {
     hasControl = (name === username);
+	if (!hasControl){
+		$("#menudiv").collapse("hide");
+	}
+	else{
+		$("#menudiv").collapse("show");
+	}
   });
 
   socket.on('cameraUpdate', function(data) {

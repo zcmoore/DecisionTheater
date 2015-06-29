@@ -21,6 +21,7 @@ var adding = false;
 var selectedObject;
 var oldMaterial;
 var addableLampMesh;
+var objectControl;
 
 function getCameraData()
 {
@@ -243,6 +244,9 @@ function deleteSelectedObject(){
 		sendDeletionNotice(selectedObject.serverID);
 		//scene.remove(selectedObject);
 		selectedObject = null;
+		objectControl.detach();
+		scene.remove(objectControl);
+		$("#transform").collapse("hide");
 	}
 }
 
@@ -255,6 +259,7 @@ function onDocumentMouseUp( event ) {
 			var intersects = raycaster.intersectObjects(addablePlaces);
 
 			if (intersects.length > 0){
+				$("#objectlist").collapse("toggle");
 				var obj = intersects[0].object;	
 				scene.remove(obj);
 				for(i = 0; i < addablePlaces.length; i++) {
@@ -286,6 +291,10 @@ function onDocumentMouseUp( event ) {
 				selectedObject = obj;
 				oldMaterial = selectedObject.material;
 				selectedObject.material = new THREE.MeshBasicMaterial( { color: 0x00ff00} );
+				objectControl.attach(selectedObject);
+				objectControl.setSize(2);
+				scene.add(objectControl);
+				$("#transform").collapse("show");
 			}
 		}
 	}
@@ -315,7 +324,13 @@ function init() {
   // SCENE
   fillScene();
   addToDOM();
+  
+  objectControl = new THREE.TransformControls( camera, renderer.domElement );
+  objectControl.addEventListener( 'change', render );
+  
+
   render();
+  
   
 }
 
@@ -391,4 +406,50 @@ function startRenderApp() {
     var errorReport = "Your program encountered an unrecoverable error, can not draw on canvas. Error was:<br/><br/>";
     $('#container').append(errorReport + e);
   }
+}
+
+function bindUIFunctionality(){
+	$("#viewing").collapse("hide");
+	$("#editing").collapse("show");
+
+	$(document).ready(function(){
+		$("#viewMode").click(function(){
+			$("#viewing").collapse("show");
+			$("#editing").collapse("hide");
+		});
+		$("#editMode").click(function(){
+			$("#viewing").collapse("hide");
+			$("#editing").collapse("show");
+		});
+		$("#nightOn").click(function(){
+			changeNightMode(true);
+		});
+		$("#nightOff").click(function(){
+			changeNightMode(false);
+		});
+		$("#Add").click(function(){
+			$("#objectlist").collapse("toggle");
+		});
+		$("#lampbtn").click(function(){
+			showAddablePlaces();
+		});
+		$("#Delete").click(function(){
+			deleteSelectedObject();
+		});
+		$("#menu").click(function(){
+			$(".col-md-4").collapse("toggle");
+			if (hasControl){
+				$("#menudiv").collapse("show");
+			}
+		});
+		$("#notebutton").click(function(){
+			$("#notifications").collapse("toggle");
+		});
+		$("#Translate").click(function(){
+			objectControl.setMode("translate");
+		});
+		$("#Rotate").click(function(){
+			objectControl.setMode("rotate");
+		});
+	});
 }
