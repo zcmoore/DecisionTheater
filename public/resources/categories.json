@@ -1,0 +1,33 @@
+{
+	"Vehicles":
+		[
+			"Turning around in median",
+			"Pulling up together and leaving in oposite directions",
+			"Cars Speeding",
+			"Unloading groups of people"
+		],
+	"Suspicious":
+		[
+			"Digging",
+			"Kneeling",
+			"Running Wire",
+			"Covering Up Wire",
+			"Sweeping the Road",
+			"Lookout"
+		],
+	"Individuals":
+		[
+			"Loitering",
+			"Carrying Items",
+			"Unusual Gait",
+			"Loitering in Empty Market"
+		],
+	"Crowd":
+		[
+			"Random clearning of pedestrians",
+			"Group running together",
+			"Circling the same block",
+			"People signaling others to stay away"
+		],
+	"Other": []
+}

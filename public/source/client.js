@@ -63,7 +63,7 @@ function connectToServer() {
   socket.on('objectCreated', function(data) {
     onObjectCreate(data);
   });
-  
+
   socket.on('objectDelete', function(id) {
     deleteObjectByID(id);
   });
