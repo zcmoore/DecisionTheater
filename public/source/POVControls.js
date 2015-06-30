@@ -30,16 +30,11 @@ THREE.POVControls = function ( object, domElement ) {
 	// center is old, deprecated; use "target" instead
 	this.center = this.target;
 
-	// This option actually enables dollying in and out; left as "zoom" for
-	// backwards compatibility
+	// Set to true to disable this control
 	this.noZoom = false;
 	this.zoomSpeed = 1.0;
 
-	// Limits to how far you can dolly in and out ( PerspectiveCamera only )
-	this.minDistance = 0;
-	this.maxDistance = Infinity;
-
-	// Limits to how far you can zoom in and out ( OrthographicCamera only )
+	// Limits to how far you can zoom in and out
 	this.minZoom = 0;
 	this.maxZoom = Infinity;
 
@@ -164,7 +159,7 @@ THREE.POVControls = function ( object, domElement ) {
 
 	};
 
-	this.dollyIn = function ( dollyScale ) {
+	this.zoomIn = function ( dollyScale ) {
 
 		if ( dollyScale === undefined ) {
 
@@ -190,7 +185,7 @@ THREE.POVControls = function ( object, domElement ) {
 
 	};
 
-	this.dollyOut = function ( dollyScale ) {
+	this.zoomOut = function ( dollyScale ) {
 
 		if ( dollyScale === undefined ) {
 
@@ -317,11 +312,11 @@ THREE.POVControls = function ( object, domElement ) {
 
 			if ( dollyDelta.y > 0 ) {
 
-				scope.dollyIn();
+				scope.zoomIn();
 
 			} else if ( dollyDelta.y < 0 ) {
 
-				scope.dollyOut();
+				scope.zoomOut();
 
 			}
 
@@ -376,11 +371,11 @@ THREE.POVControls = function ( object, domElement ) {
 
 		if ( delta > 0 ) {
 
-			scope.dollyOut();
+			scope.zoomOut();
 
 		} else if ( delta < 0 ) {
 
-			scope.dollyIn();
+			scope.zoomIn();
 
 		}
 
@@ -495,11 +490,11 @@ THREE.POVControls = function ( object, domElement ) {
 
 			if ( dollyDelta.y > 0 ) {
 
-				scope.dollyOut();
+				scope.zoomOut();
 
 			} else if ( dollyDelta.y < 0 ) {
 
-				scope.dollyIn();
+				scope.zoomIn();
 
 			}
 
