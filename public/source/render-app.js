@@ -85,7 +85,7 @@ function onCameraUpdate(cameraData) {
 function onObjectCreate(objectData) {
 	loader.load(
 	'public/models/light/lampJoint.js',
-	
+
 	function ( geometry, materials ) {
 		var material = new THREE.MeshFaceMaterial( materials );
 		var lamp = new THREE.SkinnedMesh( geometry, material );
@@ -125,7 +125,7 @@ function onObjectListCreate(objectList) {
 	var keys = [];
 	for(var k in objectList) keys.push(k);
 
-	for (i = 0; i < keys.length; i++) { 
+	for (i = 0; i < keys.length; i++) {
 		onObjectCreate(objectList[keys[i]]);
 	}
 }
@@ -153,7 +153,7 @@ function turnNightOn(){
 	light.intensity = 0.0;
 	light2.intensity = 0.0;
 	nightMode = true;
-	for (i = 0; i < lightList.length; i++) { 
+	for (i = 0; i < lightList.length; i++) {
 		lightList[i].intensity = 0.8;
 	}
 }
@@ -162,7 +162,7 @@ function turnNightOff(){
 	light.intensity = 1.0;
 	light2.intensity = 1.0;
 	nightMode = false;
-	for (i = 0; i < lightList.length; i++) { 
+	for (i = 0; i < lightList.length; i++) {
 		lightList[i].intensity = 0.0;
 	}
 }
@@ -340,7 +340,6 @@ function onDocumentMouseUp( event ) {
 		if (currentMode == Modes.ADD && mouseMoved == false){
 			raycaster = new THREE.Raycaster();
 			raycaster.setFromCamera( mouse, camera );	
-
 			var intersects = raycaster.intersectObjects(addablePlaces);
 
 			if (intersects.length > 0){
@@ -358,8 +357,9 @@ function onDocumentMouseUp( event ) {
 					pos_z: obj.position.z,
 					rot_x: obj.rotation.x,
 					rot_y: obj.rotation.y,
-					rot_z: obj.rotation.z					
+					rot_z: obj.rotation.z
 				};
+
 				hideAddablePlaces();
 				sendObjectCreation(objectData);
 				switchModes(Modes.EDIT);
@@ -367,12 +367,12 @@ function onDocumentMouseUp( event ) {
 		}
 		else if (currentMode == Modes.EDIT){
 			var raycaster = new THREE.Raycaster();
-			raycaster.setFromCamera( mouse, camera );	
+			raycaster.setFromCamera( mouse, camera );
 
 			var intersects = raycaster.intersectObjects(selectableObjects);
 
 			if (intersects.length > 0){
-				var obj = intersects[0].object;	
+				var obj = intersects[0].object;
 				selectedObject = obj;
 				objectControl.attach(selectedObject);
 				scene.add(objectControl);
@@ -383,13 +383,12 @@ function onDocumentMouseUp( event ) {
 		else if (currentMode == Modes.ADDANY && mouseMoved == false){
 			console.log(mouseMoved = false);
 			var raycaster = new THREE.Raycaster();
-			raycaster.setFromCamera( mouse, camera );	
+			raycaster.setFromCamera( mouse, camera );
 
 			var intersects = raycaster.intersectObject(city);
 
 			if (intersects.length > 0){
 				var pos = intersects[0].point;
-				
 				var objectData = {
 					id: "-1",
 					pos_x: pos.x,
@@ -397,14 +396,13 @@ function onDocumentMouseUp( event ) {
 					pos_z: pos.z,
 					rot_x: 0,
 					rot_y: 0,
-					rot_z: 0					
+					rot_z: 0
 				};
 				sendObjectCreation(objectData);
 				switchModes(Modes.EDIT);
 			}
 			scene.remove(meshToAdd);
 			meshToAdd = null;
-			
 		}
 	}
 }
@@ -435,14 +433,12 @@ function init() {
   // SCENE
   fillScene();
   addToDOM();
-  
+
   objectControl = new THREE.TransformControls( camera, renderer.domElement );
   objectControl.addEventListener( 'change', render );
-  
+
 
   render();
-  
-  
 }
 
 function fillScene() {
