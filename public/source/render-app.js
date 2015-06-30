@@ -207,7 +207,7 @@ function showAddablePlaces(){
 				'public/models/light/lampJoint.js',
 				
 				function ( geometry, materials ) {
-					var material = new THREE.MeshFaceMaterial( materials );
+					var material = new THREE.MeshLambertMaterial( {color: 0x00ffff} );
 					var mesh = new THREE.SkinnedMesh( geometry, material );
 					scene.add(mesh);
 					meshToAdd = mesh;
