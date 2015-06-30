@@ -44,6 +44,12 @@ function connectToServer() {
 
   socket.on('controlgrant', function(username) {
     hasControl = (name === username);
+	if (!hasControl){
+		$("#menudiv").collapse("hide");
+	}
+	else{
+		$("#menudiv").collapse("show");
+	}
   });
 
   socket.on('cameraUpdate', function(data) {
@@ -60,6 +66,10 @@ function connectToServer() {
 
   socket.on('objectDelete', function(id) {
     deleteObjectByID(id);
+  });
+  
+  socket.on('objectUpdate', function(data) {
+    updateObjectByID(data);
   });
   
   socket.on('requestObjects', function(objects) {
@@ -109,6 +119,10 @@ function sendObjectCreation(object){
 
 function sendDeletionNotice(id){
   socket.emit('deleteid',id);
+}
+
+function sendObjectUpdate(object){
+  socket.emit('objectUpdate',object);
 }
 
 function sendUpdateLightMode(bool){
