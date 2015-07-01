@@ -9,11 +9,12 @@
   <link rel="stylesheet" href="../public/lib/bootstrap.css" />
   <script type="text/javascript" src="../public/lib/bootstrap.js"></script>
   <link rel="stylesheet" href="../public/app.css" />
-  
+
   <script type="text/javascript" src="../public/models/smallcityroadWaypoints.js"></script>
   <script type="text/javascript" src="../public/lib/three.min.js"></script>
   <script type="text/javascript" src="../public/lib/Coordinates.js"></script>
   <script type="text/javascript" src="../public/lib/OrbitControls.js"></script>
+  <script type="text/javascript" src="../public/source/POVControls.js"></script>
   <script type="text/javascript" src="../public/lib/TransformControls.js"></script>
   <script type="text/javascript" src="../public/lib/dat.gui.min.js"></script>
 
@@ -67,16 +68,17 @@
 				  </br>
 				  <div class="btn-group" role="group" aria-label="addremove">
 					<button type="button" id = "Add" class="btn btn-primary">Add Object</button>
-					<button type="button" id = "Delete" class="btn btn-success">Delete Object</button>
-					</br>
-					</br>
 					<button type="button" id = "AddAny" class="btn btn-primary">Add Anywhere</button>
+					</br>
+					<button type="button" id = "Remove" class="btn btn-warning">Remove Object</button>
+					<button type="button" id = "Delete" class="btn btn-danger">Delete Object</button>
+					</br>
 					<button type="button" id = "Cancel" class="btn btn-warning">Cancel</button>
 				  </div>
 				  <div id="transform" class = "collapse">
 				  Editing Options
 					  </br>
-					  <div class="btn-group" role="group" aria-label="addremove">
+					  <div class="btn-group" role="group" aria-label="transrot">
 						<button type="button" id = "Translate" class="btn btn-primary">Translate</button>
 						<button type="button" id = "Rotate" class="btn btn-success">Rotate</button>
 					  </div>
@@ -124,7 +126,7 @@
     startClient();
     onWindowResize();
 	bindUIFunctionality();
-	
+
 	});
   </script>
 </body>
