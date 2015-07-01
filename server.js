@@ -107,6 +107,14 @@ io.sockets.on('connection', function(socket) {
 	  io.sockets.emit('objectDelete', id);
     }
   });
+  
+  socket.on('removeid', function(id){
+    if (socket.username === activeUserName)
+    {
+      deleteObject(id);
+	  io.sockets.emit('objectRemove', id);
+    }
+  });
 
   socket.on('nightMode', function(objectData){
     if (socket.username === activeUserName)

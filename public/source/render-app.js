@@ -249,7 +249,7 @@ function onDocumentMouseDown( event ) {
 	}
 }
 
-function deleteObjectByID(id){
+function removeObjectByID(id){
 	if (id != '-1'){
 		for(i = 0; i < selectableObjects.length; i++) {
 			if(selectableObjects[i] === lamps[id]) {
@@ -272,6 +272,21 @@ function deleteObjectByID(id){
 	}
 }
 
+function deleteObjectByID(id){
+	if (id != '-1'){
+		for(i = 0; i < selectableObjects.length; i++) {
+			if(selectableObjects[i] === lamps[id]) {
+			   selectableObjects.splice(i, 1);
+			   break;
+			}
+		}
+		scene.remove(lamps[id]);
+		delete lamps[id];
+		scene.remove(lightList[id]);
+		delete lightList[id];
+	}
+}
+
 function updateObjectByID(objectData){
 	var id = objectData.id;
 	if (id != '-1'){
@@ -281,9 +296,21 @@ function updateObjectByID(objectData){
 }
 
 function deselectCurrentObject(){
+	$("#transform").collapse("hide");
 	selectedObject = null;
 	objectControl.detach();
 	scene.remove(objectControl);
+}
+
+function removeSelectedObject(){
+	if (selectedObject){
+		sendRemovalNotice(selectedObject.serverID);
+		selectedObject = null;
+		objectControl.detach();
+		scene.remove(objectControl);
+		$("#transform").collapse("hide");
+		switchModes(Modes.EDIT);
+	}
 }
 
 function deleteSelectedObject(){
@@ -304,31 +331,41 @@ function switchModes(mode){
 		case Modes.VIEW:
 		break;
 		case Modes.ADD:
-			$("#objectlist").collapse("hide");
+			if (mode != Modes.ADD && mode != Modes.ADDANY){
+				$("#objectlist").collapse("hide");
+			}
 			hideAddablePlaces();
 		break;
 		case Modes.ADDANY:
-			$("#objectlist").collapse("hide");
+			if (mode != Modes.ADD && mode != Modes.ADDANY){
+				$("#objectlist").collapse("hide");
+			}
+			scene.remove(meshToAdd);
+			meshToAdd = null;
 		break;
 		case Modes.TRANSFORM:
 			deselectCurrentObject();
 		break;
 	}
-	currentMode=mode;
-	switch(currentMode){ // activate new mode and actions
+	switch(mode){ // activate new mode and actions
 		case Modes.EDIT:
 		break;
 		case Modes.VIEW:
 		break;
 		case Modes.ADD:
-			$("#objectlist").collapse("show");
+			if (currentMode != Modes.ADD && currentMode != Modes.ADDANY){
+				$("#objectlist").collapse("show");
+			}
 		break;
 		case Modes.ADDANY:
-			$("#objectlist").collapse("show");
+			if (currentMode != Modes.ADD && currentMode != Modes.ADDANY){
+				$("#objectlist").collapse("show");
+			}
 		break;
 		case Modes.TRANSFORM:
 		break;
 	}
+	currentMode=mode;
 }
 
 function cancelCurrentAction(){
@@ -381,7 +418,6 @@ function onDocumentMouseUp( event ) {
 			}
 		}
 		else if (currentMode == Modes.ADDANY && mouseMoved == false){
-			console.log(mouseMoved = false);
 			var raycaster = new THREE.Raycaster();
 			raycaster.setFromCamera( mouse, camera );
 
@@ -435,7 +471,7 @@ function init() {
   addToDOM();
 
   objectControl = new THREE.TransformControls( camera, renderer.domElement );
-  objectControl.addEventListener( 'change', render );
+  objectControl.setSpace("world");
 
 
   render();
@@ -494,12 +530,12 @@ function addToDOM() {
 function render() {
   requestAnimationFrame(render);
   var delta = clock.getDelta();
-  if (currentMode != Modes.TRANSFORM){
-	cameraControls.enabled = hasControl;
+  	cameraControls.enabled = hasControl;
     cameraControls.update(delta);
+  if (currentMode != Modes.TRANSFORM){
   }
   else{
-	cameraControls.enabled = false;
+	//cameraControls.enabled = false;
 	objectControl.update();
   }
   if (currentMode == Modes.ADDANY && meshToAdd){
@@ -554,6 +590,9 @@ function bindUIFunctionality(){
 		});
 		$("#lampbtn").click(function(){
 			showAddablePlaces();
+		});
+		$("#Remove").click(function(){
+			removeSelectedObject();
 		});
 		$("#Delete").click(function(){
 			deleteSelectedObject();
