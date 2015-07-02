@@ -79,6 +79,16 @@ body {
   left:0;
   margin:5px;
 }
+#loadNotification{
+    text-shadow: 0 0 5px #FFFFFF;
+	font-weight: bold;
+	z-index: 2;
+	position: absolute;
+	padding: 15px;
+	margin: 0 auto;
+	text-align: center;
+	width: 100%;
+}
 nav #notifications{height:200px;}
 nav #notifications{overflow:hidden; overflow-y:scroll;}
 nav #objectlist{height:350px;}

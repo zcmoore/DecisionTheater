@@ -510,6 +510,8 @@ function fillScene() {
 				city = new THREE.Mesh( geometry, material );
 				scene.add( city );
 				cityLoader.onLoadComplete=function(){};
+				$("#loadNotification").remove();
+				
 		});
 	}
 	cityLoader.load(
@@ -519,13 +521,6 @@ function fillScene() {
 			city = new THREE.Mesh( geometry, material );
 			scene.add( city );
 	});
-	/*cityLoader.load(
-		'public/models/smallcity/smallbuildings.js',
-		function ( geometry, materials ) {
-			var material = new THREE.MeshFaceMaterial( materials );
-			var mesh = new THREE.Mesh( geometry, material );
-			scene.add( mesh );
-	});*/
 	loader.load(
 		'public/models/light/lampJoint.js',
 		function ( geometry, materials ) {
