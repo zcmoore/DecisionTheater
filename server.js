@@ -18,7 +18,7 @@ var objectList={};
 var messageList = [];
 var lastCameraMessage = null;
 
-server.listen(process.env.PORT || 80);
+server.listen(process.env.PORT || 8080);
 
 app.set('view engine', 'ejs');
 app.set('view options', {
@@ -30,8 +30,13 @@ app.use(app.router);
 app.use('/public', express.static('public'));
 
 app.get('/', function(req, res) {
+  res.render('mainIndex');
+});
+
+app.get('/cityPlanning', function(req, res) {
   res.render('index');
 });
+
 
 function grantControl(socket) {
   activeUserName = socket.username;
