@@ -165,23 +165,25 @@ module.exports = {
     grantControl({username: userQueue[0]});
     userListChanged();
   });
-	},
-	createObject: function (objectData) {
+	}
+};
+
+
+function createObject(objectData) {
 		var date = new Date();
 		objectData.id = date.getTime();
 		objectList[objectData.id] = objectData;
-	},
-	deleteObject: function (objectID) {
+};
+function deleteObject(objectID) {
 		if (objectID in objectList) {
 			delete objectList[objectID];
 			return true;
 		} else {
 			return false;
 		}
-	},
-	updateObject: function (objectData) {
+};
+function updateObject(objectData) {
 		if (objectData.id in objectList) {
 			objectList[objectData.id] = objectData;
 		}
-	}
 };
