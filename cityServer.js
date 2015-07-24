@@ -1,5 +1,5 @@
 // All camera updates received by the server in timeframes of this length will be chained together into a single message
-var cameraChainTime = 500;
+/*var cameraChainTime = 500;
 
 var nodes = {};
 var usernames = {};
@@ -11,12 +11,14 @@ var nightMode = false;
 var objectList={};
 var messageList = [];
 var lastCameraMessage = null;
-var io;
+var io;*/
+
+var citysession;
 
 function grantControl(socket) {
   activeUserName = socket.username;
-  io.sockets.emit('controlgrant', socket.username);
-  io.sockets.emit('serverNotification', 'Control given to ' + wrapUsername(socket.username));
+  citysession.emitToSockets('controlgrant', socket.username);
+  citysession.emitToSockets('serverNotification', 'Control given to ' + wrapUsername(socket.username));
   userListChanged();
 }
 
@@ -26,143 +28,145 @@ function wrapUsername(username)
 }
 
 function userListChanged() {
-  io.sockets.emit('updateusers', usernames, activeUserName);
+  citysession.emitToSockets('updateusers', citysession.usernames, citysession.activeUserName);
 }
 
 /** Returns true if there is a user with the given username, or false otherwise */
 function isUserConnected(username) {
-  var index = userQueue.indexOf(username);
+  var index = citysession.userQueue.indexOf(username);
   if (index >= 0) return true;
   else return false;
 }
 
 module.exports = {
-  citySocket: function (IO,socket){
-  io = IO;
+  setupSocket: function (IO,socket,curSession){
+  citysession = curSession;
+  citysession.io = IO;
   socket.on('adduser', function(username) {
     if (isUserConnected(username)) {
       socket.emit('serverResponse', { request: "adduser", success: false, reason: "username is in use" });
       //socket.disconnect();
     }
     else {
-      userQueue.push(username);
+      citysession.userQueue.push(username);
       socket.username = username;
-      usernames[username] = username;
-
-      if (Object.keys(usernames).length == 1) {
-        activeUserName = username;
+	  citysession.sockets.push(socket);
+      citysession.usernames[username] = username;
+		console.log(citysession.usernames + "  user names");
+      if (Object.keys(citysession.usernames).length == 1) {
+        citysession.activeUserName = username;
         grantControl(socket);
       }
 
       userListChanged();
-	  socket.emit('requestObjects', objectList);
-      io.sockets.emit('requestCamera');
-	  socket.emit('nightMode', nightMode);
-      socket.broadcast.emit('serverNotification', wrapUsername(username) + ' has joined.');
+	  socket.emit('requestObjects', citysession.objectList);
+      citysession.emitToSockets('requestCamera');
+	  socket.emit('nightMode', citysession.nightMode);
+      citysession.emitToSockets('serverNotification', wrapUsername(username) + ' has joined.');
     }
   });
 
   socket.on('transferControl', function(targetUsername) {
-    if (socket.username === activeUserName
-      && usernames[targetUsername] !== null
-      && usernames[targetUsername] !== undefined
-      && userQueue.indexOf(targetUsername) >= 0) {
+    if (socket.username === citysession.activeUserName
+      && citysession.usernames[targetUsername] !== null
+      && citysession.usernames[targetUsername] !== undefined
+      && citysession.userQueue.indexOf(targetUsername) >= 0) {
       grantControl( {username: targetUsername} );
     }
 	});
 
   socket.on('objectCreated', function(objectData){
-    if (socket.username === activeUserName)
+    if (socket.username === citysession.activeUserName)
     {
       createObject(objectData);
-	  io.sockets.emit('objectCreated', objectData);
-      //socket.broadcast.emit('objectCreated', objectData);
+	  citysession.emitToSockets('objectCreated', objectData);
+      //citysession.emitToSockets('objectCreated', objectData);
       var positonString = objectData.pos_x.toFixed(2) + ', ' + objectData.pos_y.toFixed(2) + ', ' + objectData.pos_z.toFixed(2);
-      io.sockets.emit('serverNotification', 'Object created at (' + positonString + ')');
+      citysession.emitToSockets('serverNotification', 'Object created at (' + positonString + ')');
     }
   });
   
   socket.on('deleteid', function(id){
-    if (socket.username === activeUserName)
+    if (socket.username === citysession.activeUserName)
     {
       deleteObject(id);
-	  io.sockets.emit('objectDelete', id);
+	  citysession.emitToSockets('objectDelete', id);
     }
   });
   
   socket.on('removeid', function(id){
-    if (socket.username === activeUserName)
+    if (socket.username === citysession.activeUserName)
     {
       deleteObject(id);
-	  io.sockets.emit('objectRemove', id);
+	  citysession.emitToSockets('objectRemove', id);
     }
   });
 
   socket.on('nightMode', function(objectData){
-    if (socket.username === activeUserName)
+    if (socket.username === citysession.activeUserName)
     {
-	  nightMode = objectData;
-      socket.broadcast.emit('nightMode', objectData);
+	  citysession.nightMode = objectData;
+      citysession.emitToSockets('nightMode', objectData);
       var mode = (objectData) ? 'Night Mode' : 'Day Mode';
-      io.sockets.emit('serverNotification', 'Switched to ' + mode);
+      citysession.emitToSockets('serverNotification', 'Switched to ' + mode);
     }
   });
 
   socket.on('requestObjects', function(){
-    if (socket.username === activeUserName)
+    if (socket.username === citysession.activeUserName)
     {
-      socket.broadcast.emit('requestObjects', objectList);
+      citysession.emitToSockets('requestObjects', citysession.objectList);
     }
   });
 
   socket.on('deleteObject', function(objectID){
-      if (socket.username === activeUserName)
+      if (socket.username === citysession.activeUserName)
       {
           var deleted = deleteObject(objectID);
-          socket.broadcast.emit('objectDeleted', deleted);
+          citysession.emitToSockets('objectDeleted', deleted);
           // TODO: braodcast server notification
       }
   });
   
     socket.on('objectUpdate', function(object){
-      if (socket.username === activeUserName)
+      if (socket.username === citysession.activeUserName)
       {
           updateObject(object);
-          socket.broadcast.emit('objectUpdate', object);
+          citysession.emitToSockets('objectUpdate', object);
       }
   });
 
   socket.on('cameraUpdate', function(cameraData) {
-    if (socket.username === activeUserName) {
-      socket.broadcast.emit('cameraUpdate', cameraData);
+    if (socket.username === citysession.activeUserName) {
+      citysession.emitToSockets('cameraUpdate', cameraData);
       var currentTime = new Date().getTime();
       cameraData.updateType = 'cameraUpdate';
       cameraData.updateStart = currentTime;
       cameraData.updateEnd = currentTime;
 
-      if (lastCameraMessage == null) {
-        lastCameraMessage = cameraData;
+      if (citysession.lastCameraMessage == null) {
+        citysession.lastCameraMessage = cameraData;
       }
-      else if (lastCameraMessage.updateStart + 500 > cameraData.updateStart) {
+      else if (citysession.lastCameraMessage.updateStart + 500 > cameraData.updateStart) {
         // chain the updates
-        cameraData.updateStart = lastCameraMessage.updateStart;
-        lastCameraMessage = cameraData;
+        cameraData.updateStart = citysession.lastCameraMessage.updateStart;
+        citysession.lastCameraMessage = cameraData;
       }
       else {
-        messageList.push(lastCameraMessage);
-        lastCameraMessage = cameraData;
+        citysession.messageList.push(citysession.lastCameraMessage);
+        citysession.lastCameraMessage = cameraData;
       }
     }
   });
 
   socket.on('disconnect', function() {
-    delete usernames[socket.username];
-    var index = userQueue.indexOf(socket.username);
+    delete citysession.usernames[socket.username];
+    var index = citysession.userQueue.indexOf(socket.username);
     if (index >= 0) {
-      userQueue.splice(index, 1);
+      citysession.userQueue.splice(index, 1);
     }
-    io.sockets.emit('serverNotification', wrapUsername(socket.username) + ' has left.');
-    grantControl({username: userQueue[0]});
+    citysession.emitToSockets('serverNotification', wrapUsername(socket.username) + ' has left.');
+    grantControl({username: citysession.userQueue[0]});
     userListChanged();
   });
 	}
@@ -172,18 +176,18 @@ module.exports = {
 function createObject(objectData) {
 		var date = new Date();
 		objectData.id = date.getTime();
-		objectList[objectData.id] = objectData;
+		citysession.objectList[objectData.id] = objectData;
 };
 function deleteObject(objectID) {
-		if (objectID in objectList) {
-			delete objectList[objectID];
+		if (objectID in citysession.objectList) {
+			delete citysession.objectList[objectID];
 			return true;
 		} else {
 			return false;
 		}
 };
 function updateObject(objectData) {
-		if (objectData.id in objectList) {
-			objectList[objectData.id] = objectData;
+		if (objectData.id in citysession.objectList) {
+			citysession.objectList[objectData.id] = objectData;
 		}
 };
