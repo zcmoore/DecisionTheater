@@ -21,9 +21,22 @@ TRACKING.trace = function( scene, camera, mouse ) {
 
 	var intersects = raycaster.intersectObjects(scene.children);
 	if (intersects.length > 0) {
-		var collidingObject = intersects[0].object;
+		return intersects[0].object;
+	}
+	else {
+		return null;
+	}
+}
+
+TRACKING.track = function( scene, camera, mouse ) {
+	var collidingObject = TRACKING.trace( scene, camera, mouse );
+
+	if (collidingObject != null) {
 		var tracker = new TRACKING.TrackingTarget( collidingObject );
 		return tracker;
+	}
+	else {
+		return null;
 	}
 }
 
