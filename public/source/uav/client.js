@@ -164,6 +164,10 @@ function relinquishControls() {
 	socket.emit('relinquishControl');
 }
 
+function sendTag(tag) {
+	socket.emit('addTag', tag);
+}
+
 function requestControls() {
 	/*
 	  var message = {
