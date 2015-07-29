@@ -18,6 +18,7 @@ var objectList = {};
 var messageList = [];
 var lastCameraMessage = null;
 var actors = [];
+var tags = [];
 
 server.listen(process.env.PORT || 8080);
 
@@ -99,6 +100,12 @@ io.sockets.on('connection', function(socket) {
 		if (socket.username === activeUserName) {
 			actors = actorShells;
 			socket.broadcast.emit('actorUpdate', actorShells);
+		}
+	});
+
+	socket.on('addTag', function(tag) {
+		if (socket.username === activeUserName) {
+			tags.push(tag);
 		}
 	});
 

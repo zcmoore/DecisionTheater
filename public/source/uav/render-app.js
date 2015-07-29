@@ -179,11 +179,12 @@ function createVector3(psuedo) {
 }
 
 function registerTag(tag) {
-	// TODO
 	var tracker = {
 		target: tagTarget,
 		tag: tag
 	};
+
+	sendTag(tag);
 }
 
 function pause() {
