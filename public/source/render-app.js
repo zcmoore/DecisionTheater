@@ -492,16 +492,30 @@ function fillScene() {
   scene.add(ambientLight);
   scene.add(light);
   scene.add(light2);
-  	$.getJSON( "../public/models/smallcity/roadWaypoints.json", function( data ) {
+  	$.getJSON( "public/models/smallcity/roadWaypoints.json", function( data ) {
 		for (i = 0; i < data.road1.length; i++) {
 			var pos = data.road1[i];
 			lightPlaces.push(new THREE.Vector3(pos.x,pos.y,pos.z));
 		}
 	});
 
+	
 	loader = new THREE.JSONLoader();
-	loader.load(
-		'../public/models/smallcity/small.js',
+	var cityLoader = new THREE.JSONLoader();
+	cityLoader.onLoadComplete=function(){
+		cityLoader.load(
+			'public/models/smallcity/smallbuildings.js',
+			function ( geometry, materials ) {
+				var material = new THREE.MeshFaceMaterial( materials );
+				city = new THREE.Mesh( geometry, material );
+				scene.add( city );
+				cityLoader.onLoadComplete=function(){};
+				$("#loadNotification").remove();
+				
+		});
+	}
+	cityLoader.load(
+		'public/models/smallcity/smallground.js',
 		function ( geometry, materials ) {
 			var material = new THREE.MeshFaceMaterial( materials );
 			city = new THREE.Mesh( geometry, material );
