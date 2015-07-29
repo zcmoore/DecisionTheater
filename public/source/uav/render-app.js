@@ -72,6 +72,14 @@ var vehicleModelPaths = [
 
 var actors = [];
 
+function registerTag(tag) {
+	// TODO
+	var tracker = {
+		target: tagTarget,
+		tag: tag
+	};
+}
+
 function pause() {
 	$("#usermenu").removeClass("hidden");
 	$("#usermenu").addClass("hidden");
@@ -788,9 +796,9 @@ function createTagList() {
 
 					var optionButtonCallback = (function(tag){
 						return function(){
-							// TODO: tag object and register tag
 							tagTarget.isTagged = true;
-							console.log(tag);
+							var tagObject = createTag(tag);
+							registerTag(tagObject);
 							unpause();
 						}
 					})(option);
@@ -799,6 +807,15 @@ function createTagList() {
 			}
 		}
 	});
+}
+
+function createTag(tag) {
+	var tagObject =  {
+		tag: tag,
+		location: tagTarget.position.clone()
+	};
+
+	return tagObject;
 }
 
 function manufactureButton(id, text) {
@@ -814,33 +831,11 @@ function bindUIFunctionality() {
 	$("#editing").collapse("show");
 
 	$(document).ready(function() {
-		$("#lampbtn").click(function() {});
-		$("#nightOn").click(function() {});
-		$("#nightOff").click(function() {});
-		$("#Translate").click(function() {});
-		$("#Rotate").click(function() {});
-		$("#Add").click(function() {});
-		$("#AddAny").click(function() {});
-		$("#Cancel").click(function() {});
-		$("#Remove").click(function() {});
-		$("#Delete").click(function() {});
-
-		$("#viewMode").click(function() {
-			$("#viewing").collapse("show");
-			$("#editing").collapse("hide");
-		});
-		$("#editMode").click(function() {
-			$("#viewing").collapse("hide");
-			$("#editing").collapse("show");
-		});
 		$("#menu").click(function() {
 			$(".col-md-4").collapse("toggle");
 			if (hasControl) {
 				$("#menudiv").collapse("show");
 			}
-		});
-		$("#notebutton").click(function() {
-			$("#notifications").collapse("toggle");
 		});
 		$(".col-md-4").mouseover(function() {
 			inUI = true;
