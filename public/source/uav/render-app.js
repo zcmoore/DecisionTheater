@@ -1,3 +1,5 @@
+var resourcesLoaded = false;
+
 var camera, scene, renderer;
 var cameraControls, effectController;
 var clock = new THREE.Clock();
@@ -93,7 +95,7 @@ function assembleShells() {
 		var actor = actors[i];
 		var shell = {
 			movementSpeed: actor.movementSpeed,
-			position: actor.position,
+			position: createVector3(actor.position),
 			lookatTarget: actor.lookatTarget,
 			movementTarget: actor.movementTarget,
 			movementEpicenter: actor.movementEpicenter,
@@ -107,6 +109,8 @@ function assembleShells() {
 
 		actorShells[i] = shell;
 	}
+
+	sendShells();
 }
 
 function updateShells() {
@@ -116,7 +120,7 @@ function updateShells() {
 		var shell = actorShells[i];
 
 		shell.movementSpeed = actor.movementSpeed;
-		shell.position = actor.position;
+		shell.position = createVector3(actor.position.clone());
 		shell.lookatTarget = actor.lookatTarget;
 		shell.movementTarget = actor.movementTarget;
 		shell.movementEpicenter = actor.movementEpicenter;
@@ -127,17 +131,35 @@ function updateShells() {
 		shell.modelIndex = actor.modelIndex;
 		shell.modelType = actor.modelType;
 	}
+
+	sendShells();
 }
 
 function receiveShells(shells) {
 	actorShells = shells;
+	if (actors.length <= 0)
+	{
+		for (var i = 0; i < actorShells.length; i++)
+		{
+			var shell = actorShells[i];
+			var models = (shell.modelType == "person") ? peopleModels : vehicleModels;
+			var model = models[shell.modelIndex];
+			var actor = model.clone();
+
+			actors.push(actor);
+			scene.add(actor);
+		}
+	}
+
 	for (var i = 0; i < actors.length; i++)
 	{
 		var actor = actors[i];
 		var shell = actorShells[i];
 
 		actor.movementSpeed = shell.movementSpeed;
-		actor.position = shell.position;
+		actor.position.x = shell.position.x;
+		actor.position.y = shell.position.y;
+		actor.position.z = shell.position.z;
 		actor.lookatTarget = shell.lookatTarget;
 		actor.movementTarget = shell.movementTarget;
 		actor.movementEpicenter = shell.movementEpicenter;
@@ -147,7 +169,13 @@ function receiveShells(shells) {
 		actor.movementType = shell.movementType;
 		actor.modelIndex = shell.modelIndex;
 		actor.modelType = shell.modelType;
+
+		console.log(shell.position);
 	}
+}
+
+function createVector3(psuedo) {
+	return new THREE.Vector3(psuedo.x, psuedo.y, psuedo.z);
 }
 
 function registerTag(tag) {
@@ -179,7 +207,9 @@ function unpause() {
 	paused = false;
 }
 
-function populateCity() {
+function generateActors() {
+	needActorGeneration = false;
+
 	// Populate crowds
 	for (var cityIndex = 0; cityIndex < uavWaypoints.length; cityIndex++)
 	{
@@ -239,8 +269,16 @@ function populateCity() {
 	}
 
 	assembleShells();
+}
 
+function populateCity() {
 	var sceneLoader = new THREE.JSONLoader();
+
+	if (needActorGeneration)
+	{
+		generateActors();
+	}
+
 	sceneLoader.load(
 		'public/models/HeatMap/Models/Scene/scene.js',
 		function(geometry, materials) {
@@ -257,6 +295,7 @@ function loadVehicleModel(meshLoader, index) {
 		meshLoader.onLoadComplete = function()
 		{
 			console.log("Loaded " + vehicleModelPaths.length + " vehicle models");
+			resourcesLoaded = true;
 			populateCity();
 		};
 	}
@@ -413,6 +452,7 @@ function getCameraData() {
 		position_x: position_x,
 		position_y: position_y,
 		position_z: position_z,
+		fov: camera.fov,
 		target_x: target_x,
 		target_y: target_y,
 		target_z: target_z
@@ -435,6 +475,7 @@ function onCameraUpdate(cameraData) {
 	camera.position.x = cameraData.position_x;
 	camera.position.y = cameraData.position_y;
 	camera.position.z = cameraData.position_z;
+	camera.fov = cameraData.fov;
 	cameraControls.target.x = cameraData.target_x;
 	cameraControls.target.y = cameraData.target_y;
 	cameraControls.target.z = cameraData.target_z;
@@ -694,6 +735,7 @@ function render() {
 		if (hasControl) {
 			moveCamera(delta);
 			moveActors(delta);
+			updateShells();
 			updateCamera();
 		}
 	}
