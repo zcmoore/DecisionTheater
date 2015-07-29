@@ -16,7 +16,7 @@ var inUI = false;
 var optionListIDs = [];
 
 // Desired flight time, in seconds
-var runtime = 600; // 10 minutes
+var runtime = 600;
 
 // Speed of UAV, in world-units per second
 var speed;
@@ -71,6 +71,84 @@ var vehicleModelPaths = [
 ];
 
 var actors = [];
+var actorShells = [];
+
+/*
+Components of a shell:
+	movementSpeed
+	position
+	lookatTarget
+	movementTarget
+	movementEpicenter
+	movementRadius
+	movementRoute
+	movementIndex
+	movementType
+	modelIndex
+	modelType
+*/
+function assembleShells() {
+	for (var i = 0; i < actors.length; i++)
+	{
+		var actor = actors[i];
+		var shell = {
+			movementSpeed: actor.movementSpeed,
+			position: actor.position,
+			lookatTarget: actor.lookatTarget,
+			movementTarget: actor.movementTarget,
+			movementEpicenter: actor.movementEpicenter,
+			movementRadius: actor.movementRadius,
+			movementRoute: actor.movementRoute,
+			movementIndex: actor.movementIndex,
+			movementType: actor.movementType,
+			modelIndex: actor.modelIndex,
+			modelType: actor.modelType
+		};
+
+		actorShells[i] = shell;
+	}
+}
+
+function updateShells() {
+	for (var i = 0; i < actors.length; i++)
+	{
+		var actor = actors[i];
+		var shell = actorShells[i];
+
+		shell.movementSpeed = actor.movementSpeed;
+		shell.position = actor.position;
+		shell.lookatTarget = actor.lookatTarget;
+		shell.movementTarget = actor.movementTarget;
+		shell.movementEpicenter = actor.movementEpicenter;
+		shell.movementRadius = actor.movementRadius;
+		shell.movementRoute = actor.movementRoute;
+		shell.movementIndex = actor.movementIndex;
+		shell.movementType = actor.movementType;
+		shell.modelIndex = actor.modelIndex;
+		shell.modelType = actor.modelType;
+	}
+}
+
+function receiveShells(shells) {
+	actorShells = shells;
+	for (var i = 0; i < actors.length; i++)
+	{
+		var actor = actors[i];
+		var shell = actorShells[i];
+
+		actor.movementSpeed = shell.movementSpeed;
+		actor.position = shell.position;
+		actor.lookatTarget = shell.lookatTarget;
+		actor.movementTarget = shell.movementTarget;
+		actor.movementEpicenter = shell.movementEpicenter;
+		actor.movementRadius = shell.movementRadius;
+		actor.movementRoute = shell.movementRoute;
+		actor.movementIndex = shell.movementIndex;
+		actor.movementType = shell.movementType;
+		actor.modelIndex = shell.modelIndex;
+		actor.modelType = shell.modelType;
+	}
+}
 
 function registerTag(tag) {
 	// TODO
@@ -101,120 +179,8 @@ function unpause() {
 	paused = false;
 }
 
-function moveActors(delta)
-{
-	for (var actorIndex = 0; actorIndex < actors.length; actorIndex++)
-	{
-		var actor = actors[actorIndex];
-		switch (actor.movementType)
-		{
-			case "path":
-				moveActorAlongPath(delta, actor);
-				break;
-			case "loiter":
-				loiter(delta, actor);
-				break;
-		}
-	}
-}
-
-function redefineLoiterTarget(actor) {
-	var newTarget = actor.movementEpicenter.clone();
-	newTarget.y = 0;
-	var offsetMin = -actor.movementRadius;
-	var offsetMax = actor.movementRadius;
-	var offsetRange = offsetMax - offsetMin;
-	var zOffset = Math.floor((Math.random() * offsetRange) + offsetMin);
-	var xOffset = Math.floor((Math.random() * offsetRange) + offsetMin);
-	var offset = new THREE.Vector3(xOffset, 0, zOffset);
-	newTarget.add(offset);
-
-	actor.movementTarget = newTarget;
-}
-
-function loiter( delta, actor ) {
-	var threshold = 1;
-
-	var movementAmount;
-	var movementAllowance = delta * actor.movementSpeed;
-	var currentPosition = actor.position.clone();
-	var nextWaypoint = actor.movementTarget;
-	var distanceToNextWaypoint = currentPosition.distanceTo(nextWaypoint);
-
-	if (distanceToNextWaypoint <= movementAllowance + threshold)
-	{
-		movementAmount = distanceToNextWaypoint;
-		movementAllowance -= distanceToNextWaypoint;
-
-		redefineLoiterTarget(actor);
-	}
-	else {
-		movementAmount = movementAllowance;
-		movementAllowance = 0;
-	}
-
-	movementVector = new THREE.Vector3();
-	movementVector.subVectors(nextWaypoint, currentPosition).normalize().multiplyScalar(movementAmount);
-	actor.position.add(movementVector);
-
-	if (movementAllowance > 1)
-	{
-		remainingDelta = movementAllowance / speed;
-		loiter(remainingDelta, actor);
-	}
-}
-
-function moveActorAlongPath( delta, actor ) {
-	if (actor.movementIndex >= actor.movementRoute.length)
-	{
-		actor.movementIndex = 0;
-	}
-
-	var threshold = 1;
-
-	var movementAmount;
-	var movementAllowance = delta * actor.movementSpeed;
-	var currentPosition = actor.position.clone();
-	var nextWaypoint = actor.movementRoute[actor.movementIndex];
-	var distanceToNextWaypoint = currentPosition.distanceTo(nextWaypoint);
-
-	if (distanceToNextWaypoint <= movementAllowance + threshold)
-	{
-		actor.movementIndex += 1;
-		movementAmount = distanceToNextWaypoint;
-		movementAllowance -= distanceToNextWaypoint;
-	}
-	else {
-		movementAmount = movementAllowance;
-		movementAllowance = 0;
-	}
-
-	movementVector = new THREE.Vector3();
-	movementVector.subVectors(nextWaypoint, currentPosition).normalize().multiplyScalar(movementAmount);
-	actor.position.add(movementVector);
-
-	if (movementAllowance > 1)
-	{
-		remainingDelta = movementAllowance / speed;
-		moveActorAlongPath(remainingDelta, actor);
-	}
-}
-
 function populateCity() {
-	/*
-	movementSpeed
-	position
-	lookatTarget
-	movementTarget
-	movementEpicenter
-	movementRadius
-	movementRoute
-	movementIndex
-	movementType
-	modelIndex
-	modelType
-	*/
-	// TODO: populate crowds
+	// Populate crowds
 	for (var cityIndex = 0; cityIndex < uavWaypoints.length; cityIndex++)
 	{
 		var temp = uavWaypoints[cityIndex];
@@ -271,6 +237,8 @@ function populateCity() {
 		actors.push(actor);
 		scene.add(actor);
 	}
+
+	assembleShells();
 
 	var sceneLoader = new THREE.JSONLoader();
 	sceneLoader.load(
