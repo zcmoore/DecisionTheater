@@ -184,24 +184,3 @@ io.sockets.on('connection', function(socket) {
     userListChanged();
   });
 });
-
-function createObject(objectData) {
-    var date = new Date();
-	objectData.id = date.getTime();
-    objectList[objectData.id] = objectData;
-}
-
-function deleteObject(objectID) {
-    if (objectID in objectList) {
-        delete objectList[objectID];
-        return true;
-    } else {
-        return false;
-    }
-}
-
-function updateObject(objectData) {
-    if (objectData.id in objectList) {
-        objectList[objectData.id] = objectData;
-    }
-}
