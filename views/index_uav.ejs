@@ -1,0 +1,104 @@
+<html>
+
+<head>
+	<title>Decision Theatre</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<script type="text/javascript" src="../public/lib/jquery-1.11.3.min.js"></script>
+	<script src="../../socket.io/socket.io.js"></script>
+	<link rel="stylesheet" href="../public/lib/bootstrap.css" />
+	<script type="text/javascript" src="../public/lib/bootstrap.js"></script>
+	<link rel="stylesheet" href="../public/app.css" />
+
+	<script type="text/javascript" src="../public/lib/three.min.js"></script>
+	<script type="text/javascript" src="../public/lib/Coordinates.js"></script>
+	<script type="text/javascript" src="../public/lib/OrbitControls.js"></script>
+	<script type="text/javascript" src="../public/source/POVControls.js"></script>
+	<script type="text/javascript" src="../public/lib/TransformControls.js"></script>
+	<script type="text/javascript" src="../public/lib/dat.gui.min.js"></script>
+
+	<script type="text/javascript" src="../public/lib/stats.min.js"></script>
+	<script type="text/javascript" src="../public/lib/sprintf.js"></script>
+	<script type="text/javascript" src="../public/lib/tween.min.js"></script>
+	<script type="text/javascript" src="../public/lib/uclass_shaders.js"></script>
+	<script type="text/javascript" src="../public/lib/TrackballControls.js"></script>
+	<script type="text/javascript" src="../public/lib/Detector.js"></script>
+	<script type="text/javascript" src="../public/source/lighting.js"></script>
+	<!-- <script type="text/javascript" src="../public/source/target-tracking.js"></script> -->
+
+	<script type="text/javascript" src="../public/source/client.js"></script>
+	<script type="text/javascript" src="../public/source/uav/render-app.js"></script>
+</head>
+
+<body>
+
+	<div id="validLogin" class="innerbody">
+		<!-- /Nav Bar  -->
+		<div class="container" id="dashboard">
+			<div id="loadNotification">City Assets Loading</div>
+			<div class="row" />
+			<div class="col-md-8">
+				<div id="jsviewport">
+				</div>
+				<div class="clear"></div>
+			</div>
+			<!-- /Camera Space  -->
+
+			<div class="menuclass" id="usermenu">
+				<button type="button" id="menu" class="btn btn-primary">Menu</button>
+				<br/>
+				<div class="col-md-4 collapse">
+					<b>Users</b>
+					<hr />
+					<div id="users"></div>
+					<hr/>
+					<b><u>Notifications:</u></b>
+					<nav>
+						<div id="notifications" style="text-align: left;margin-top:5px"></div>
+					</nav>
+					<div class="clear"></div>
+					<hr/>
+				</div>
+			</div>
+
+			<div class="hidden taglist" id="tagmenu">
+				<div class="col-md-4">
+					<div>
+						Tags
+						<hr />
+						<div class="btn-group" role="group" aria-label="addremove" id="taglist">
+
+						</div>
+					</div>
+					<div class="clear"></div>
+					<hr/>
+				</div>
+			</div>
+			<!-- /User List  -->
+		</div>
+	</div>
+	<!-- /Dashboard  -->
+
+	</div>
+	<!-- /Valid Login Panel  -->
+
+	<div id="invalidLogin" class="middlealign">
+		<p>Name required to enter Decision Theatre</p>
+	</div>
+	<!-- /Invalid Login Panel  -->
+
+	<script>
+		$(document).ready(function() {
+			$('#validLogin').hide();
+			$('#invalidLogin').hide();
+
+			startRenderApp();
+			startClient();
+			onWindowResize();
+			bindUIFunctionality();
+
+		});
+	</script>
+</body>
+
+</html>
