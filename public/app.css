@@ -51,8 +51,8 @@ body {
   -moz-transform: translateY(-50%);
   /* Firefox 3.5+ */
 }
-.clear { 
-  clear: both; 
+.clear {
+  clear: both;
   height: 0;
   font-size: 0;
   overflow: hidden;
@@ -61,7 +61,16 @@ body {
   width: 0;
   line-height: 0;
 }
+.hidden {
+  display: none;
+}
 .menuclass{
+  position:absolute;
+  margin-left:15px;
+  width:auto;
+  z-index: 1;
+}
+.taglist{
   position:absolute;
   margin-left:15px;
   width:auto;
@@ -93,4 +102,3 @@ nav #notifications{height:200px;}
 nav #notifications{overflow:hidden; overflow-y:scroll;}
 nav #objectlist{height:350px;}
 nav #objectlist{overflow:hidden; overflow-y:scroll;}
-
