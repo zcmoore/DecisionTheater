@@ -526,6 +526,7 @@ function fillScene() {
 		function ( geometry, materials ) {
 			addableLampMesh = geometry;
 	});
+	
 }
 
 function addToDOM() {

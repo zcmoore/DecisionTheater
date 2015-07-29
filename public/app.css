@@ -98,3 +98,17 @@ nav #objectlist{overflow:hidden; overflow-y:scroll;}
 	padding: 60px;
 	float: left;
 }
+
+#heatmapcontainer{
+  position:relative;
+  margin-left:15px;
+  z-index: 5;
+  width : auto;
+  height : auto;
+  background-color: #888888;
+  
+}
+
+.heatmap-canvas{
+	style="z-index:2;"
+}

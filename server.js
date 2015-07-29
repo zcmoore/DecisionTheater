@@ -5,6 +5,8 @@ var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 var cityServer = require('./cityServer');
 var uavServer = require('./uavServer');
+var fs = require('fs');
+var sys = require('sys');
 
 var sessions = [];
 
@@ -45,6 +47,12 @@ io.sockets.on('connection', function(socket) {
 	}
 	uavServer.setupSocket(io,socket,sessions[sessionid]);
   }
+  
+  socket.on('getImage', function(img){
+	var data = img.replace(/^data:image\/\w+;base64,/, "");
+	var buf = new Buffer(data, 'base64');
+	fs.writeFile('image.png',buf);
+  });
 
 });
 
@@ -68,8 +76,4 @@ function Session(){
 			}
 		}
 	}
-}
-
-function printArgs(){
-	
 }

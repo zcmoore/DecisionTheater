@@ -166,3 +166,4 @@ function getTimestamp() {
     hour = ('0' + hour).slice(-2);
     return month + '/' + day + '/' + year + ' ' + hour + ':' + min + ':' + sec;
 }
+
