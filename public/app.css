@@ -102,3 +102,22 @@ nav #notifications{height:200px;}
 nav #notifications{overflow:hidden; overflow-y:scroll;}
 nav #objectlist{height:350px;}
 nav #objectlist{overflow:hidden; overflow-y:scroll;}
+
+#mainDashboard{
+	padding: 60px;
+	float: left;
+}
+
+#heatmapcontainer{
+  position:relative;
+  margin-left:15px;
+  z-index: 5;
+  width : auto;
+  height : auto;
+  background-color: #888888;
+  
+}
+
+.heatmap-canvas{
+	style="z-index:2;"
+}

@@ -13,10 +13,9 @@ function startClient() {
 }
 
 function connectToServer() {
-  socket = io.connect('/');
-
+  socket = io.connect('/',{query: "appid=1"});
+  
   socket.on('connect', function() {
-    // serverside call
     socket.emit('adduser', name);
   });
 

@@ -1,0 +1,28 @@
+<html>
+	<head>
+		<title>Decision Theatre</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script type="text/javascript" src="../public/lib/jquery-1.11.3.min.js"></script>
+		<script src="../../socket.io/socket.io.js"></script>
+		<link rel="stylesheet" href="../public/lib/bootstrap.css" />
+		<script type="text/javascript" src="../public/lib/bootstrap.js"></script>
+		<link rel="stylesheet" href="../public/app.css" />
+		<script type="text/javascript" src="public/lib/heatmap.js"></script>
+		<script type="text/javascript" src="../public/source/HeatMapController.js"></script>
+	</head>
+	<body>
+		<div class="navbar navbar-inverse navbar-fixed-top">
+			<div class="container">
+				<div class="navbar-header">
+					<a class="navbar-brand">Decision Theatre Dashboard</a>
+				</div>
+			</div>
+		</div>
+		<div class="container" id = "mainDashboard">
+			<ul>
+				<li><a href="/cityPlanning">City Planning</a></li>
+				<li><a href="/uav">UAV Heatmap</a></li>
+			</ul>
+		</div>
+	</body>
+</html>
