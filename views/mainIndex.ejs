@@ -8,7 +8,7 @@
 		<script type="text/javascript" src="../public/lib/bootstrap.js"></script>
 		<link rel="stylesheet" href="../public/app.css" />
 		<script type="text/javascript" src="public/lib/heatmap.js"></script>
-		<script type="text/javascript" src="../public/source/test.js"></script>
+		<script type="text/javascript" src="../public/source/HeatMapController.js"></script>
 	</head>
 	<body>
 		<div class="navbar navbar-inverse navbar-fixed-top">
@@ -23,16 +23,6 @@
 				<li><a href="/cityPlanning">City Planning</a></li>
 				<li><a href="/uav">UAV Heatmap</a></li>
 			</ul>
-			<div id = "heatmapcontainer">
-				<canvas class = "uav" id = "imagecanvas" style="z-index:1">
-				</canvas>
-			</div>
 		</div>
-		<script>
-
-		  $(document).ready(function(){
-				runHeatMap();
-			});
-		 </script>
 	</body>
 </html>
