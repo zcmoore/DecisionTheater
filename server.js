@@ -3,8 +3,8 @@ var _ = require('underscore');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
-var cityServer = require('./cityServer');
-var uavServer = require('./uavServer');
+var cityServer = require('./server_city');
+var uavServer = require('./server_uav');
 var fs = require('fs');
 var sys = require('sys');
 
@@ -26,11 +26,11 @@ app.get('/', function(req, res) {
 });
 
 app.get('/cityPlanning', function(req, res) {
-  res.render('cityindex');
+  res.render('index_city');
 });
 
 app.get('/uav', function(req, res) {
-  res.render('uavindex');
+  res.render('index_uav');
 });
 
 io.sockets.on('connection', function(socket) {
@@ -43,7 +43,7 @@ io.sockets.on('connection', function(socket) {
   }
   else if (socket.handshake.query.appid == '2') {
     if(!sessions[sessionid]){
-		sessions[sessionid] = new Session();
+		sessions[sessionid] = new uavServer.UavSession();
 	}
 	uavServer.setupSocket(io,socket,sessions[sessionid]);
   }

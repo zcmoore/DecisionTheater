@@ -18,11 +18,11 @@ function HeatMapController(){
 	var heatcanvas;
 	var heatmap;
 	var img;
-	var self = this;
+	var imgview;
 }
 
-HeatMapController.prototype.createHeatMap = function(imageLoc, divContainer, leftBound,rightBound,lowerBound,upperBound){
-	this.heatmapdiv = divContainer;
+HeatMapController.prototype.createHeatMap = function(imageLoc, leftBound,rightBound,lowerBound,upperBound){
+	this.heatmapdiv = document.createElement('div');
 	this.imagecanvas = document.createElement('canvas');
 	var heatmapInstance;
 	this.lx = leftBound;
@@ -41,7 +41,7 @@ HeatMapController.prototype.createHeatMap = function(imageLoc, divContainer, lef
 		var config = {
 			container: hmc.heatmapdiv,
 			maxOpacity: .6,
-			minOpacity: .25,
+			minOpacity: .05,
 			radius: 20,
 			width: hmc.imgWidth,
 			height: hmc.imgHeight
@@ -52,9 +52,11 @@ HeatMapController.prototype.createHeatMap = function(imageLoc, divContainer, lef
 }
 
 HeatMapController.prototype.addPoint = function(ix,iy){
+	console.log(ix +"x" + iy);
+	console.log(this.hx +"xx" + this.lx);
 	var x = Math.floor(this.imgWidth*(ix-this.lx)/(this.hx-this.lx));
 	var y = Math.floor(this.imgHeight*(iy-this.ly)/(this.hy-this.ly));
-	this.heatmap.addData({ x: x, y: y, value: .5 });
+	this.heatmap.addData({ x: x, y: y, value: .25 });
 }
 
 
@@ -75,6 +77,7 @@ HeatMapController.prototype.submitImage = function(){
 }
 
 HeatMapController.prototype.setImage = function(img){
+	this.imgview = img;
 	var sendcanvas = document.createElement('canvas');
 	this.heatcanvas = this.heatmapdiv.firstChild;
 	var ctx = sendcanvas.getContext("2d");
@@ -83,10 +86,24 @@ HeatMapController.prototype.setImage = function(img){
 	ctx.drawImage(this.imagecanvas,0,0);
 	ctx.drawImage(this.heatcanvas,0,0);
 	var dataURL = sendcanvas.toDataURL();
-	img.width = 1000;
-	img.height = 1000;
-	img.src=dataURL;
+	this.imgview.src=dataURL;
 }
+
+HeatMapController.prototype.updateImage = function(){
+	if (this.imgview){
+		var sendcanvas = document.createElement('canvas');
+		this.heatcanvas = this.heatmapdiv.firstChild;
+		var ctx = sendcanvas.getContext("2d");
+		sendcanvas.width=this.imgWidth;
+		sendcanvas.height=this.imgHeight;
+		ctx.drawImage(this.imagecanvas,0,0);
+		ctx.drawImage(this.heatcanvas,0,0);
+		var dataURL = sendcanvas.toDataURL();
+		this.imgview.src=dataURL;
+		console.log("updated?");
+	}
+}
+
 
 function generateManyPoints(heatmapcontroller){
 	var len = 200;

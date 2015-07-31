@@ -13,6 +13,8 @@ var messageList = [];
 var lastCameraMessage = null;
 var io;*/
 
+var Session = require('./Session.js');
+
 var citysession;
 
 function grantControl(socket) {
@@ -44,7 +46,10 @@ module.exports = {
   citysession.io = IO;
   socket.on('adduser', function(username) {
     if (isUserConnected(username)) {
-      socket.emit('serverResponse', { request: "adduser", success: false, reason: "username is in use" });
+		socket.emit('serverResponse', { 
+			request: "adduser", 
+			success: false, 
+			reason: "username is in use" });
       //socket.disconnect();
     }
     else {

@@ -75,6 +75,9 @@ var vehicleModelPaths = [
 var actors = [];
 var actorShells = [];
 
+var heatmapcontroller;
+var imageSet = false;
+
 /*
 Components of a shell:
 	movementSpeed
@@ -169,8 +172,6 @@ function receiveShells(shells) {
 		actor.movementType = shell.movementType;
 		actor.modelIndex = shell.modelIndex;
 		actor.modelType = shell.modelType;
-
-		console.log(shell.position);
 	}
 }
 
@@ -286,6 +287,13 @@ function populateCity() {
 			var material = new THREE.MeshFaceMaterial(materials);
 			city = new THREE.Mesh(geometry, material);
 			scene.add(city);
+			heatmapcontroller = new HeatMapController();
+			var bbh = new THREE.BoundingBoxHelper(city,0xff0000);
+			geometry.computeBoundingBox();
+			var bounds = geometry.boundingBox;
+			heatmapcontroller.createHeatMap("public/HeatMap/models/Scene/Quadrant1.jpg",
+										bounds.min.x,bounds.max.z,
+										bounds.min.z,bounds.max.z);
 			$("#loadNotification").remove();
 	});
 }
@@ -540,7 +548,7 @@ function onDocumentMouseUp(event) {
 			var raycaster = new THREE.Raycaster();
 			raycaster.precision = 500;
 			raycaster.setFromCamera(mouse, camera);
-			var intersection = raycaster.intersectObjects(/*city*/scene.children);
+			var intersection = raycaster.intersectObjects(actors);
 
 			// TODO: add targeting logic
 			console.log("attempting trace");
@@ -825,7 +833,8 @@ function createTag(tag) {
 		tag: tag,
 		location: tagTarget.position.clone()
 	};
-
+	heatmapcontroller.addPoint(tagTarget.position.x,tagTarget.position.z);
+	heatmapcontroller.updateImage();
 	return tagObject;
 }
 
@@ -848,10 +857,25 @@ function bindUIFunctionality() {
 				$("#menudiv").collapse("show");
 			}
 		});
-		$(".col-md-4").mouseover(function() {
+		$("#heatView").click(function() {
+			if (!imageSet){
+				heatmapcontroller.setImage(document.getElementById("heatViewer"));
+				imageSet = true;
+			}
+			if($("#heatViewer").is(":visible")){
+				$("#heatView").text("Show Heatmap");
+				$("#heatViewer").hide();
+			}
+			else {
+				$("#heatView").text("Hide Heatmap");
+				$("#heatViewer").show();
+			}
+			
+		});
+		$("#menuclass").mouseover(function() {
 			inUI = true;
 		});
-		$(".col-md-4").mouseout(function() {
+		$("menuclass").mouseout(function() {
 			inUI = false;
 		});
 	});

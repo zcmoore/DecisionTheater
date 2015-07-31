@@ -15,7 +15,7 @@ function startClient() {
 }
 
 function connectToServer() {
-	socket = io.connect('/');
+	socket = io.connect('/',{query: "appid=2"});
 
 	socket.on('connect', function() {
 		// serverside call
@@ -115,7 +115,6 @@ function connectToServer() {
 }
 
 function sendShells() {
-  console.log("sending shells");
 	socket.emit('actorUpdate', actorShells);
 }
 
