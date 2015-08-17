@@ -40,9 +40,9 @@ HeatMapController.prototype.createHeatMap = function(imageLoc, leftBound,rightBo
 		ctx.drawImage(hmc.img,0,0);
 		var config = {
 			container: hmc.heatmapdiv,
-			maxOpacity: .6,
-			minOpacity: .05,
-			radius: 20,
+			maxOpacity: .75,
+			minOpacity: .3,
+			radius: 50,
 			width: hmc.imgWidth,
 			height: hmc.imgHeight
 		};
@@ -52,11 +52,9 @@ HeatMapController.prototype.createHeatMap = function(imageLoc, leftBound,rightBo
 }
 
 HeatMapController.prototype.addPoint = function(ix,iy){
-	console.log(ix +"x" + iy);
-	console.log(this.hx +"xx" + this.lx);
 	var x = Math.floor(this.imgWidth*(ix-this.lx)/(this.hx-this.lx));
 	var y = Math.floor(this.imgHeight*(iy-this.ly)/(this.hy-this.ly));
-	this.heatmap.addData({ x: x, y: y, value: .25 });
+	this.heatmap.addData({ x: x, y: y, value: .2 });
 }
 
 

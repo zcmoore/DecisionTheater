@@ -1,6 +1,7 @@
 {
     "animations": [
         {
+			"name": "walk",
             "fps": 1,
             "hierarchy": [
                 {

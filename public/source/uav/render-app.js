@@ -38,6 +38,7 @@ var vehicleScale = 0.075;
 var peopleMovementSpeedMin = 4;
 var peopleMovementSpeedMax = 15;
 var peopleScale = 0.1;
+var threeMaxScale = 15;
 var loiterRadiusMin = 100;
 var loiterRadiusMax = 200;
 var loiterDistanceMin = -350;
@@ -58,7 +59,7 @@ var carPaths = [];
 var nextWaypointIndex = 0;
 var civilianModelPaths = [
 	'public/models/HeatMap/Models/People/Arab/Men/man.js',
-	//'public/models/HeatMap/Models/People/Arab/Women/women.js' // There is a problem with this model (property '112' is undefined?)
+	
 ];
 var goodGuyModelPaths = [
 	'public/models/HeatMap/Models/People/Soldier/soldier.js'
@@ -77,6 +78,7 @@ var actorShells = [];
 
 var heatmapcontroller;
 var imageSet = false;
+
 
 /*
 Components of a shell:
@@ -172,6 +174,8 @@ function receiveShells(shells) {
 		actor.movementType = shell.movementType;
 		actor.modelIndex = shell.modelIndex;
 		actor.modelType = shell.modelType;
+		
+		
 	}
 }
 
@@ -208,7 +212,8 @@ function unpause() {
 	$("#usermenu").removeClass("hidden");
 	paused = false;
 }
-
+var animations = [];
+var animCounter = 0;
 function generateActors() {
 	needActorGeneration = false;
 
@@ -225,6 +230,7 @@ function generateActors() {
 			var model = peopleModels[modelIndex];
 
 			var actor = model.clone();
+			console.log(actor);
 			actor.modelType = "person";
 			actor.modelIndex = modelIndex;
 			actor.movementType = "loiter";
@@ -243,6 +249,11 @@ function generateActors() {
 
 			actors.push(actor);
 			scene.add(actor);
+
+			animations.push(new THREE.Animation(actor, actor.geometry.animations[0]));
+			animations[animCounter].play();
+			animCounter++;
+			//animation.play();
 		}
 	}
 
@@ -344,8 +355,12 @@ function loadBadGuyModel(meshLoader, index) {
 	meshLoader.load(
 		badGuyModelPaths[index],
 		function(geometry, materials) {
+			for ( var i = 0; i < materials.length; i ++ ) {
+				var m = materials[ i ];
+				m.skinning = true;
+			}
 			var material = new THREE.MeshFaceMaterial(materials);
-			var model = new THREE.Mesh(geometry, material);
+			var model = new THREE.SkinnedMesh(geometry, material);
 			model.scale.set(peopleScale, peopleScale, peopleScale);
 			badGuyModels.push(model);
 			peopleModels.push(model);
@@ -371,9 +386,13 @@ function loadGoodGuyModel(meshLoader, index) {
 	meshLoader.load(
 		goodGuyModelPaths[index],
 		function(geometry, materials) {
+			for ( var i = 0; i < materials.length; i ++ ) {
+				var m = materials[ i ];
+				m.skinning = true;
+			}
 			var material = new THREE.MeshFaceMaterial(materials);
-			var model = new THREE.Mesh(geometry, material);
-			model.scale.set(peopleScale, peopleScale, peopleScale);
+			var model = new THREE.SkinnedMesh(geometry, material);
+			model.scale.set(threeMaxScale, threeMaxScale, threeMaxScale);
 			goodGuyModels.push(model);
 			peopleModels.push(model);
 	});
@@ -398,9 +417,13 @@ function loadCivilianModel(meshLoader, index) {
 	meshLoader.load(
 		civilianModelPaths[index],
 		function(geometry, materials) {
+			for ( var i = 0; i < materials.length; i ++ ) {
+				var m = materials[ i ];
+				m.skinning = true;
+			}
 			var material = new THREE.MeshFaceMaterial(materials);
-			var model = new THREE.Mesh(geometry, material);
-			model.scale.set(peopleScale, peopleScale, peopleScale);
+			var model = new THREE.SkinnedMesh(geometry, material);
+			model.scale.set(threeMaxScale, threeMaxScale, threeMaxScale);
 			civilianModels.push(model);
 			peopleModels.push(model);
 	});
@@ -737,6 +760,9 @@ function render() {
 	requestAnimationFrame(render);
 	var delta = clock.getDelta();
 	cameraControls.enabled = hasControl;
+	
+	THREE.AnimationHandler.update( delta );
+
 
 	if (!paused)
 	{
@@ -833,6 +859,7 @@ function createTag(tag) {
 		tag: tag,
 		location: tagTarget.position.clone()
 	};
+	console.log("here?");
 	heatmapcontroller.addPoint(tagTarget.position.x,tagTarget.position.z);
 	heatmapcontroller.updateImage();
 	return tagObject;
