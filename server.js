@@ -2,7 +2,7 @@ var express = require('express');
 var _ = require('underscore');
 var app = express();
 var server = require('http').createServer(app);
-var io = require('socket.io').listen(server);
+var io = require('socket.io').listen(server, { 'destroy buffer size': Infinity });
 var cityServer = require('./server_city');
 var uavServer = require('./server_uav');
 var fs = require('fs');
@@ -11,7 +11,6 @@ var sys = require('sys');
 var sessions = [];
 
 server.listen(process.env.PORT || 8080);
-
 app.set('view engine', 'ejs');
 app.set('view options', {
   layout: false
