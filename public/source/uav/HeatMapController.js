@@ -21,7 +21,7 @@ function HeatMapController(){
 	var imgview;
 }
 
-HeatMapController.prototype.createHeatMap = function(imageLoc, leftBound,rightBound,lowerBound,upperBound){
+HeatMapController.prototype.createHeatMap = function(imageLoc, leftBound,rightBound,lowerBound,upperBound,imgview){
 	this.heatmapdiv = document.createElement('div');
 	this.imagecanvas = document.createElement('canvas');
 	var heatmapInstance;
@@ -49,12 +49,22 @@ HeatMapController.prototype.createHeatMap = function(imageLoc, leftBound,rightBo
 		hmc.heatmap = h337.create(config);
 	}
 	this.img.src=imageLoc;
+	this.imgview = imgview;
 }
 
-HeatMapController.prototype.addPoint = function(ix,iy){
+HeatMapController.prototype.addPoint = function(cameraLocation,targetLocation,rotation,fov){
+	var ix = cameraLocation.x;
+	var iy = cameraLocation.z;
+	var tx = targetLocation.x;
+	var ty = targetLocation.z;
 	var x = Math.floor(this.imgWidth*(ix-this.lx)/(this.hx-this.lx));
 	var y = Math.floor(this.imgHeight*(iy-this.ly)/(this.hy-this.ly));
-	this.heatmap.addData({ x: x, y: y, value: .2 });
+	var scaledx = Math.floor(this.imgWidth*(tx-this.lx)/(this.hx-this.lx));
+	var scaledy = Math.floor(this.imgHeight*(ty-this.ly)/(this.hy-this.ly));
+	var height = Math.floor(Math.sqrt(Math.pow(scaledx-x,2)+Math.pow(scaledy-y,2)));
+	var width = Math.floor(height*Math.tan(fov*Math.PI/180/2)*2);
+	var degree = rotation*(180/Math.PI);
+	this.heatmap.addData({ x: x, y: y, value: .35,h:height,w:width,angle:rotation});
 }
 
 
@@ -88,29 +98,23 @@ HeatMapController.prototype.setImage = function(img){
 }
 
 HeatMapController.prototype.updateImage = function(){
-	if (this.imgview){
+	if (this.imgview && this.heatmapdiv){
 		var sendcanvas = document.createElement('canvas');
+		sendcanvas.setAttribute("id","heatViewer");
 		this.heatcanvas = this.heatmapdiv.firstChild;
 		var ctx = sendcanvas.getContext("2d");
 		sendcanvas.width=this.imgWidth;
 		sendcanvas.height=this.imgHeight;
 		ctx.drawImage(this.imagecanvas,0,0);
 		ctx.drawImage(this.heatcanvas,0,0);
-		var dataURL = sendcanvas.toDataURL();
-		this.imgview.src=dataURL;
-		console.log("updated?");
+		//var dataURL = sendcanvas.toDataURL();  Expensive operation takes a while to perform(recommend end to send/etc)
+		var imgctx = this.imgview.getContext("2d");
+		this.imgview.width = this.imgWidth;
+		this.imgview.height = this.imgHeight;
+		imgctx.drawImage(sendcanvas,0,0);
 	}
 }
 
-
-function generateManyPoints(heatmapcontroller){
-	var len = 200;
-	while (len --){
-		var x = Math.random()*(hmc.hx-hmc.lx)+hmc.lx;
-		var y = Math.random()*(hmc.hy-hmc.ly)+hmc.ly;
-		heatmapcontroller.addPoint(x,y);
-	}
-}
 
 /*
 function runHeatMap(){

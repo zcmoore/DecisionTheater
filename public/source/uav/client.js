@@ -83,6 +83,14 @@ function connectToServer() {
 	socket.on('requestObjects', function(objects) {
 		onObjectListCreate(objects);
 	});
+	
+	socket.on('requestTags', function(tags) {
+		addTags(tags);
+	});
+	
+	socket.on('newTag', function(tag) {
+		addTag(tag);
+	});
 
 	socket.on('nightMode', function(bool) {
 		updateNightMode(bool);

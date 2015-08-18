@@ -37,8 +37,7 @@ var vehicleScale = 0.075;
 
 var peopleMovementSpeedMin = 4;
 var peopleMovementSpeedMax = 15;
-var peopleScale = 0.1;
-var threeMaxScale = 15;
+var peopleScale = 10;
 var loiterRadiusMin = 100;
 var loiterRadiusMax = 200;
 var loiterDistanceMin = -350;
@@ -76,7 +75,7 @@ var vehicleModelPaths = [
 var actors = [];
 var actorShells = [];
 
-var heatmapcontroller;
+var heatmapcontroller = new HeatMapController();
 var imageSet = false;
 
 
@@ -230,7 +229,6 @@ function generateActors() {
 			var model = peopleModels[modelIndex];
 
 			var actor = model.clone();
-			console.log(actor);
 			actor.modelType = "person";
 			actor.modelIndex = modelIndex;
 			actor.movementType = "loiter";
@@ -298,14 +296,13 @@ function populateCity() {
 			var material = new THREE.MeshFaceMaterial(materials);
 			city = new THREE.Mesh(geometry, material);
 			scene.add(city);
-			heatmapcontroller = new HeatMapController();
 			var bbh = new THREE.BoundingBoxHelper(city,0xff0000);
 			geometry.computeBoundingBox();
 			var bounds = geometry.boundingBox;
 			heatmapcontroller.createHeatMap("public/HeatMap/models/Scene/Quadrant1.jpg",
 										bounds.min.x,bounds.max.z,
-										bounds.min.z,bounds.max.z);
-			$("#loadNotification").remove();
+										bounds.min.z,bounds.max.z,
+										document.getElementById("heatViewer"));
 	});
 }
 
@@ -392,7 +389,7 @@ function loadGoodGuyModel(meshLoader, index) {
 			}
 			var material = new THREE.MeshFaceMaterial(materials);
 			var model = new THREE.SkinnedMesh(geometry, material);
-			model.scale.set(threeMaxScale, threeMaxScale, threeMaxScale);
+			model.scale.set(peopleScale, peopleScale, peopleScale);
 			goodGuyModels.push(model);
 			peopleModels.push(model);
 	});
@@ -423,7 +420,7 @@ function loadCivilianModel(meshLoader, index) {
 			}
 			var material = new THREE.MeshFaceMaterial(materials);
 			var model = new THREE.SkinnedMesh(geometry, material);
-			model.scale.set(threeMaxScale, threeMaxScale, threeMaxScale);
+			model.scale.set(peopleScale, peopleScale, peopleScale);
 			civilianModels.push(model);
 			peopleModels.push(model);
 	});
@@ -516,6 +513,29 @@ function onCameraUpdate(cameraData) {
 function onObjectCreate(objectData) {}
 
 function onObjectListCreate(objectList) {}
+
+function waitForHeatmap(tags){
+    if(typeof heatmapcontroller.heatmap !== "undefined"){
+		for (i =0; i <tags.length; i++){
+			var tag = tags[i];
+			heatmapcontroller.addPoint(tag.cameraLocation,tag.targetLocation,tag.rot,tag.fov);
+		}
+		heatmapcontroller.updateImage();
+    }
+    else{
+        setTimeout(
+            waitForHeatmap
+        ,1000,tags);
+    }
+}
+function addTags(tags){
+	waitForHeatmap(tags);
+}
+
+function addTag(tag){
+	heatmapcontroller.addPoint(tag.cameraLocation,tag.targetLocation,tag.rot,tag.fov);
+	heatmapcontroller.updateImage();
+}
 
 function onWindowResize() {
 	canvasWidth = window.innerWidth;
@@ -760,12 +780,10 @@ function render() {
 	requestAnimationFrame(render);
 	var delta = clock.getDelta();
 	cameraControls.enabled = hasControl;
-	
-	THREE.AnimationHandler.update( delta );
-
 
 	if (!paused)
 	{
+		THREE.AnimationHandler.update( delta );
 		cameraControls.update(delta);
 		if (hasControl) {
 			moveCamera(delta);
@@ -855,13 +873,23 @@ function createTagList() {
 }
 
 function createTag(tag) {
+	var ix = tagTarget.position.x;
+	var iy = tagTarget.position.z;
+	var jx = camera.position.x;
+	var jy = camera.position.z;
+	var height = Math.sqrt(Math.pow(jx-ix,2)+Math.pow(jy-iy,2));
+	var width = height/Math.tan(camera.fov);
 	var tagObject =  {
 		tag: tag,
-		location: tagTarget.position.clone()
+		cameraLocation: camera.position.clone(),
+		targetLocation: tagTarget.position.clone(),
+		rot:			camera.rotation.y,
+		fov:			camera.fov
 	};
-	console.log("here?");
-	heatmapcontroller.addPoint(tagTarget.position.x,tagTarget.position.z);
-	heatmapcontroller.updateImage();
+	//heatmapcontroller.addPoint(tagObject.cameraLocation,tagObject.targetLocation,tagObject.rot,tagObject.fov);
+	if (!imageSet){
+		imageSet = true;
+	}
 	return tagObject;
 }
 
@@ -886,14 +914,16 @@ function bindUIFunctionality() {
 		});
 		$("#heatView").click(function() {
 			if (!imageSet){
-				heatmapcontroller.setImage(document.getElementById("heatViewer"));
+				heatmapcontroller.updateImage();
 				imageSet = true;
 			}
 			if($("#heatViewer").is(":visible")){
+				paused = false;
 				$("#heatView").text("Show Heatmap");
 				$("#heatViewer").hide();
 			}
 			else {
+				paused = true;
 				$("#heatView").text("Hide Heatmap");
 				$("#heatViewer").show();
 			}

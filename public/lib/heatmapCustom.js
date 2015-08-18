@@ -1,4 +1,6 @@
 /*
+ * Modified by William Hearter to create cone heat maps
+ *
  * heatmap.js v2.0.1 | JavaScript Heatmap Library
  *
  * Copyright 2008-2014 Patrick Wied <heatmapjs@patrick-wied.at> - All rights reserved.
@@ -18,6 +20,28 @@
   }
 
 })("h337", this, function () {
+
+var TO_RADIANS = Math.PI/180; 
+function drawRotatedImageAroundPoint(image, x, y, angle) { 
+ 
+	// save the current co-ordinate system 
+	// before we screw with it
+	context.save(); 
+ 
+	// move to the middle of where we want to draw our image
+	context.translate(x, y);
+ 
+	// rotate around that point, converting our 
+	// angle from degrees to radians 
+	context.rotate(angle * TO_RADIANS);
+ 
+	// draw it up and to the left by half the width
+	// and height of the image 
+	context.drawImage(image, -(image.width/2), -(image.height/2));
+ 
+	// and restore the co-ords to how they were when we began
+	context.restore(); 
+}
 
 // Heatmap Config stores default values and will be merged with instance config
 var HeatmapConfig = {
@@ -56,6 +80,9 @@ var Store = (function StoreClosure() {
     _organiseData: function(dataPoint, forceRender) {
         var x = dataPoint[this._xField];
         var y = dataPoint[this._yField];
+		var w = dataPoint['w'];
+		var h = dataPoint['h'];
+		var angle = dataPoint['angle'];
         var radi = this._radi;
         var store = this._data;
         var max = this._max;
@@ -89,7 +116,10 @@ var Store = (function StoreClosure() {
             value: value, 
             radius: radius,
             min: min,
-            max: max 
+            max: max,
+			w: w,
+			h: h,
+			angle: angle
           };
         }
     },
@@ -255,29 +285,32 @@ var Canvas2dRenderer = (function Canvas2dRendererClosure() {
     return paletteCtx.getImageData(0, 0, 256, 1).data;
   };
 
-  var _getPointTemplate = function(radius, blurFactor) {
+  var _getPointTemplate = function(width,height,blurFactor) {
     var tplCanvas = document.createElement('canvas');
     var tplCtx = tplCanvas.getContext('2d');
-    var x = radius;
-    var y = radius;
-    tplCanvas.width = tplCanvas.height = radius*2;
+    var y =  height;
+    var x = width;
+    tplCanvas.width = width;
+	tplCanvas.height = height;
+	var sl =  Math.min(width,height)/10;
+	tplCtx.shadowBlur=sl;
+	tplCtx.shadowColor= 'rgba(0,0,0,1)';
 	
     if (blurFactor == 1) {
       tplCtx.beginPath();
       //tplCtx.arc(x, y, radius, 0, 2 * Math.PI, false);
-	  tplCtx.moveTo(0,radius);
-	  tplCtx.lineTo(radius,radius);
-	  tplCtx.lineTo(radius/2,0);
+	  tplCtx.moveTo(x/2,sl);
+	  tplCtx.lineTo(x-sl,y-sl);
+	  tplCtx.lineTo(sl,y-sl);
 	  tplCtx.closePath();
       tplCtx.fillStyle = 'rgba(0,0,0,1)';
       tplCtx.fill();
     } else {
-	  console.log("in here?");
 	  tplCtx.beginPath();
       //tplCtx.arc(x, y, radius, 0, 2 * Math.PI, false);
-	  tplCtx.moveTo(0,radius);
-	  tplCtx.lineTo(radius,radius);
-	  tplCtx.lineTo(radius/2,0);
+	  tplCtx.moveTo(x/2,sl);
+	  tplCtx.lineTo(x-sl,y-sl);
+	  tplCtx.lineTo(sl,y-sl);
 	  tplCtx.closePath();
       tplCtx.fillStyle = 'rgba(0,0,0,1)';
       tplCtx.fill();
@@ -415,41 +448,50 @@ var Canvas2dRenderer = (function Canvas2dRendererClosure() {
 
         var x = point.x;
         var y = point.y;
+		var h = point.h;
+		var w = point.w;
+		var angle = point.angle;
         var radius = point.radius;
         // if value is bigger than max
         // use max as value
         var value = Math.min(point.value, max);
-        var rectX = x - radius;
-        var rectY = y - radius;
+		
+		var highest = Math.max(w,h);
+        var rectX = x;
+        var rectY = y;
         var shadowCtx = this.shadowCtx;
-
-
-
-
+		
         var tpl;
-        if (!this._templates[radius]) {
-          this._templates[radius] = tpl = _getPointTemplate(radius, blur);
+        if (!this._templates[w]) {
+          this._templates[w] = tpl = _getPointTemplate(w,h, blur);
         } else {
-          tpl = this._templates[radius];
+          tpl = this._templates[w];
         }
-        // value from minimum / value range
+        // value from minimum / valugete range
         // => [0, 1]
         shadowCtx.globalAlpha = (value-min)/(max-min);
-
-        shadowCtx.drawImage(tpl, rectX, rectY);
+		
+		shadowCtx.save(); 
+		shadowCtx.translate(x, y);
+		shadowCtx.rotate(angle);
+		shadowCtx.drawImage(tpl, -tpl.width/2, 0);
+		//shadowCtx.drawImage(image, -(image.width/2), -(image.height/2));
+		shadowCtx.restore(); 
+		
+        //shadowCtx.drawImage(tpl, rectX, rectY);
 
         // update renderBoundaries
         if (rectX < this._renderBoundaries[0]) {
-            this._renderBoundaries[0] = rectX;
+            this._renderBoundaries[0] = rectX -highest;
           } 
           if (rectY < this._renderBoundaries[1]) {
-            this._renderBoundaries[1] = rectY;
+            this._renderBoundaries[1] = rectY - highest;
           }
           if (rectX + 2*radius > this._renderBoundaries[2]) {
-            this._renderBoundaries[2] = rectX + 2*radius;
+            this._renderBoundaries[2] = rectX + highest;
           }
           if (rectY + 2*radius > this._renderBoundaries[3]) {
-            this._renderBoundaries[3] = rectY + 2*radius;
+            this._renderBoundaries[3] = rectY + highest;
           }
 
       }
