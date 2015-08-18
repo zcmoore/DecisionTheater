@@ -299,18 +299,20 @@ var Canvas2dRenderer = (function Canvas2dRendererClosure() {
     if (blurFactor == 1) {
       tplCtx.beginPath();
       //tplCtx.arc(x, y, radius, 0, 2 * Math.PI, false);
-	  tplCtx.moveTo(x/2,sl);
+	  tplCtx.moveTo(3*x/4,y/2+sl);
 	  tplCtx.lineTo(x-sl,y-sl);
 	  tplCtx.lineTo(sl,y-sl);
+	  tplCtx.lineTo(x/4,y/2+sl);
 	  tplCtx.closePath();
       tplCtx.fillStyle = 'rgba(0,0,0,1)';
       tplCtx.fill();
     } else {
 	  tplCtx.beginPath();
       //tplCtx.arc(x, y, radius, 0, 2 * Math.PI, false);
-	  tplCtx.moveTo(x/2,sl);
+	  tplCtx.moveTo(3*x/4,y/2+sl);
 	  tplCtx.lineTo(x-sl,y-sl);
 	  tplCtx.lineTo(sl,y-sl);
+	  tplCtx.lineTo(x/4,y/2+sl);
 	  tplCtx.closePath();
       tplCtx.fillStyle = 'rgba(0,0,0,1)';
       tplCtx.fill();
@@ -463,9 +465,15 @@ var Canvas2dRenderer = (function Canvas2dRendererClosure() {
 		
         var tpl;
         if (!this._templates[w]) {
-          this._templates[w] = tpl = _getPointTemplate(w,h, blur);
+	      this._templates[w] = {};
+		  this._templates[w][h] = tpl = _getPointTemplate(w,h, blur);
         } else {
-          tpl = this._templates[w];
+		  if (!this._templates[w][h]){
+			this._templates[w][h] = tpl = _getPointTemplate(w,h, blur);
+		  }
+		  else {
+			tpl = this._templates[w][h];
+		  }
         }
         // value from minimum / valugete range
         // => [0, 1]

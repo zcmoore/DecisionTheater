@@ -52,6 +52,13 @@ function loiter( delta, actor ) {
 
 	movementVector = new THREE.Vector3();
 	movementVector.subVectors(nextWaypoint, currentPosition).normalize().multiplyScalar(movementAmount);
+	rotateY = Math.atan2(movementVector.x,movementVector.z);
+	if (actor.modelType == "person"){
+		actor.rotation.y = rotateY;
+	}
+	else {
+		actor.rotation.y = rotateY + Math.PI;
+	}
 	actor.position.add(movementVector);
 
 	if (movementAllowance > 1)
@@ -70,6 +77,7 @@ function moveActorAlongPath( delta, actor ) {
 	var threshold = 1;
 
 	var movementAmount;
+	var rotateY;
 	var movementAllowance = delta * actor.movementSpeed;
 	var currentPosition = actor.position.clone();
 	var nextWaypoint = actor.movementRoute[actor.movementIndex];
@@ -88,6 +96,13 @@ function moveActorAlongPath( delta, actor ) {
 
 	movementVector = new THREE.Vector3();
 	movementVector.subVectors(nextWaypoint, currentPosition).normalize().multiplyScalar(movementAmount);
+	rotateY = Math.atan2(movementVector.x,movementVector.z);
+	if (actor.modelType == "person"){
+		actor.rotation.y = rotateY;
+	}
+	else {
+		actor.rotation.y = rotateY + Math.PI;
+	}
 	actor.position.add(movementVector);
 
 	if (movementAllowance > 1)

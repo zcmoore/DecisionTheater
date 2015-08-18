@@ -33,11 +33,11 @@ var peopleModels = [];
 
 var vehicleMovementSpeedMax = 20; // exclusive
 var vehicleMovementSpeedMin = 5;
-var vehicleScale = 0.075;
+var vehicleScale = 0.03;
 
 var peopleMovementSpeedMin = 4;
 var peopleMovementSpeedMax = 15;
-var peopleScale = 10;
+var peopleScale = 5;
 var loiterRadiusMin = 100;
 var loiterRadiusMax = 200;
 var loiterDistanceMin = -350;
@@ -751,7 +751,7 @@ function fillScene() {
 
 	loader = new THREE.JSONLoader();
 
-	for (var i = 0; i < uavWaypoints.length; i++)
+	/*for (var i = 0; i < uavWaypoints.length; i++)
 	{
 		var sphere = createMarker();
 
@@ -760,7 +760,7 @@ function fillScene() {
 		sphere.position.z = uavWaypoints[i].z;
 
 		scene.add(sphere);
-	}
+	}*/
 }
 
 function addToDOM() {
