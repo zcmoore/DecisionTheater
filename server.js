@@ -10,7 +10,7 @@ var sys = require('sys');
 
 var sessions = [];
 
-server.listen(process.env.PORT || 8080);
+server.listen(process.env.PORT || 80);
 app.set('view engine', 'ejs');
 app.set('view options', {
   layout: false
