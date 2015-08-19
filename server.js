@@ -74,5 +74,14 @@ function Session(){
 				this.sockets[i].emit.apply(this.sockets[i],arguments);
 			}
 		}
-	}
+	};
+	this.emitToSocketsNotActive = function(){
+		if (this.sockets.length > 0){
+			for (i =0; i < this.sockets.length; i++){
+				if (this.sockets[i].username != this.activeUserName){
+					this.sockets[i].emit.apply(this.sockets[i],arguments);
+				}
+			}
+		}
+	};
 }
