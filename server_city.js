@@ -143,7 +143,7 @@ module.exports = {
 
   socket.on('cameraUpdate', function(cameraData) {
     if (socket.username === citysession.activeUserName) {
-      citysession.emitToSockets('cameraUpdate', cameraData);
+      citysession.emitToSocketsNotActive('cameraUpdate', cameraData);
       var currentTime = new Date().getTime();
       cameraData.updateType = 'cameraUpdate';
       cameraData.updateStart = currentTime;
