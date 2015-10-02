@@ -31,3 +31,16 @@ function changeNightMode(bool) {
 		}
 	}
 }
+
+function updateMaterials() {
+    editor.scene.traverse( function ( node ) {
+        if ( node.material ) {
+            node.material.needsUpdate = true;
+            if ( node.material instanceof THREE.MeshFaceMaterial ) {
+                for ( var i = 0; i < node.material.materials.length; i ++ ) {
+                    node.material.materials[ i ].needsUpdate = true;
+                }
+            }
+        }
+    } );
+}
