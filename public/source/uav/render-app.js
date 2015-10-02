@@ -524,7 +524,7 @@ function waitForHeatmap(tags){
     }
     else{
         setTimeout(
-            waitForHeatmap
+            waitForHeatmap 
         ,1000,tags);
     }
 }
@@ -615,28 +615,32 @@ function onDocumentMouseUp(event) {
 
 
 					tagTarget = mark.object;
+					var sphere = createMarker();
+
+					tagTarget.add(sphere);
+					sphere.position.y += 500;
 					pause();
 				}
 			}
 
 			/*if (intersection.length > 0) {
-				var sphere = createMarker();
+			    var sphere = createMarker();
 
-				sphere.position.x = mark.point.x;
-				sphere.position.y = mark.point.y;
-				sphere.position.z = mark.point.z;
+			    sphere.position.x = mark.point.x;
+			    sphere.position.y = mark.point.y;
+			    sphere.position.z = mark.point.z;
 
-				console.log(parseFloat(mark.point.x).toFixed(2) + " "
+			    console.log(parseFloat(mark.point.x).toFixed(2) + " "
 									+ parseFloat(mark.point.y).toFixed(2) + " "
 									+ parseFloat(mark.point.z).toFixed(2));
-				scene.add( sphere );
+			    scene.add(sphere);
 			}*/
 		}
 	}
 }
 
 function createMarker() {
-	var geometry = new THREE.SphereGeometry(5);
+	var geometry = new THREE.SphereGeometry(150,32,32);
 	var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 	var sphere = new THREE.Mesh( geometry, material );
 
