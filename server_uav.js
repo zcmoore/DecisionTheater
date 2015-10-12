@@ -31,6 +31,7 @@ function UavSession(){
 	this.messageList = [];
 	this.lastCameraMessage = null;
 	this.tags = [];
+	this.viewTags = [];
 	this.actors = [];
 }
 UavSession.prototype = new Session();
@@ -89,7 +90,7 @@ module.exports = {
 			socket.emit('requestObjects', uavsession.objectList);
 			uavsession.emitToSockets('requestCamera');
 			socket.emit('nightMode', uavsession.nightMode);
-			socket.emit('requestTags', uavsession.tags);
+			socket.emit('requestTags', uavsession.tags, uavsession.viewTags);
 			uavsession.emitToSocketsNotActive('serverNotification', wrapUsername(username) + ' has joined.');
 		}
 	});
@@ -113,6 +114,13 @@ module.exports = {
 		if (socket.username === uavsession.activeUserName) {
 			uavsession.tags.push(tag);
 			uavsession.emitToSockets('newTag',tag);
+		}
+	});
+	
+	socket.on('addViewTag', function(tag) {
+		if (socket.username === uavsession.activeUserName) {
+			uavsession.viewTags.push(tag);
+			uavsession.emitToSockets('newViewTag',tag);
 		}
 	});
 	

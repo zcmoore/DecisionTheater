@@ -34,11 +34,11 @@ HeatMapController.prototype.createHeatMap = function(imageLoc, leftBound,rightBo
 			container: hmc.tagMapdiv,
 			maxOpacity: 1,
 			minOpacity: 1,
-			radius: 5,
+			radius: 10,
 			width: hmc.imgWidth,
 			height: hmc.imgHeight,
 			gradient: {
-				'1': 'black'
+				'1': '#880000'
 			  }
 		};
 		hmc.tagMap = h337.create(config);
@@ -47,10 +47,9 @@ HeatMapController.prototype.createHeatMap = function(imageLoc, leftBound,rightBo
 			container: hmc.heatMapdiv,
 			maxOpacity: 1,
 			minOpacity: .2,
-			radius: 10,
+			radius: 50,
 			width: hmc.imgWidth,
-			height: hmc.imgHeight,
-			backgroundColor: 'rgba(0,0,1,.2)'
+			height: hmc.imgHeight
 		};
 		hmc.heatMap = h337.create(config);
 	}
@@ -85,7 +84,7 @@ HeatMapController.prototype.addViewPoint = function(cameraLocation,targetLocatio
 	var height = Math.floor(Math.sqrt(Math.pow(scaledx-x,2)+Math.pow(scaledy-y,2)));
 	var width = Math.floor(height*Math.tan(fov*Math.PI/180/2)*2);
 	var degree = rotation*(180/Math.PI);
-	this.tagMap.addData({ x: x, y: y, value: 1,h:height,w:width,angle:rotation});
+	this.heatMap.addData({ x: x, y: y, value: .25,h:height,w:width,angle:rotation});
 }
 
 
@@ -122,8 +121,10 @@ HeatMapController.prototype.setImage = function(img){
 	sendcanvas.height=this.imgHeight;
 	ctx.save();
 	ctx.translate(this.imgWidth,this.imgHeight);
-	ctx.rotate(180 * (Math.PI / 180));
+	ctx.rotate(180 * (Math.PI / 180));		
 	ctx.drawImage(this.imagecanvas,0,0);
+	ctx.fillStyle = "rgba(0, 0, 255, .15)";
+	ctx.fillRect(0, 0, sendcanvas.width, sendcanvas.height);
 	ctx.drawImage(this.heatcanvas,0,0);
 	ctx.drawImage(this.taggedcanvas,0,0);
 	ctx.restore();
@@ -144,6 +145,8 @@ HeatMapController.prototype.updateImage = function(){
 		ctx.translate(this.imgWidth,this.imgHeight);
 		ctx.rotate(180 * (Math.PI / 180));
 		ctx.drawImage(this.imagecanvas,0,0);
+		ctx.fillStyle = "rgba(0, 0, 255, .15)";
+		ctx.fillRect(0, 0, sendcanvas.width, sendcanvas.height);
 		ctx.drawImage(this.heatcanvas,0,0);
 		ctx.drawImage(this.taggedcanvas,0,0);
 		ctx.restore();

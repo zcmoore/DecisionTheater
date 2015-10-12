@@ -84,12 +84,17 @@ function connectToServer() {
 		onObjectListCreate(objects);
 	});
 	
-	socket.on('requestTags', function(tags) {
+	socket.on('requestTags', function(tags,viewTags) {
 		addTags(tags);
+		addViewTags(viewTags);
 	});
 	
 	socket.on('newTag', function(tag) {
 		addTag(tag);
+	});
+	
+	socket.on('newViewTag', function(tag) {
+		addViewTag(tag);
 	});
 
 	socket.on('nightMode', function(bool) {
@@ -173,6 +178,10 @@ function relinquishControls() {
 
 function sendTag(tag) {
 	socket.emit('addTag', tag);
+}
+
+function sendViewTag(tag) {
+	socket.emit('addViewTag', tag);
 }
 
 function requestControls() {

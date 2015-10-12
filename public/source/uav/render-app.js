@@ -78,6 +78,8 @@ var actorShells = [];
 var heatmapcontroller = new HeatMapController();
 var imageSet = false;
 
+var viewTimer = 0;
+
 
 /*
 Components of a shell:
@@ -247,6 +249,14 @@ function generateActors() {
 
 			actors.push(actor);
 			scene.add(actor);
+			var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+			var material = new THREE.MeshBasicMaterial( {color: 0x00ff00,transparent:true,opacity:0} );
+			var cube = new THREE.Mesh( geometry, material );
+			actor.add( cube );
+			cube.isCollisionBox = true;
+			cube.scale.y=peopleScale;
+			cube.parent = actor;
+			actor.collisionBox = cube;
 
 			animations.push(new THREE.Animation(actor, actor.geometry.animations[0]));
 			animations[animCounter].play();
@@ -528,13 +538,34 @@ function waitForHeatmap(tags){
         ,1000,tags);
     }
 }
+function waitForHeatmapView(tags){
+    if(typeof heatmapcontroller.heatmap !== "undefined"){
+		for (i =0; i <tags.length; i++){
+			var tag = tags[i];
+			heatmapcontroller.addViewPoint(tag.cameraLocation,tag.targetLocation,tag.rot,tag.fov);
+		}
+		heatmapcontroller.updateImage();
+    }
+    else{
+        setTimeout(
+            waitForHeatmap
+        ,1000,tags);
+    }
+}
 function addTags(tags){
 	waitForHeatmap(tags);
 }
 
+function addViewTags(viewTags){
+	waitForHeatmapView(viewTags);
+}
+
 function addTag(tag){
 	heatmapcontroller.addPoint(tag.cameraLocation,tag.targetLocation,tag.rot,tag.fov);
-	heatmapcontroller.updateImage();
+}
+
+function addViewTag(viewTag){
+	heatmapcontroller.addViewPoint(viewTag.cameraLocation,viewTag.targetLocation,viewTag.rot,viewTag.fov);
 }
 
 function onWindowResize() {
@@ -591,7 +622,7 @@ function onDocumentMouseUp(event) {
 			var raycaster = new THREE.Raycaster();
 			raycaster.precision = 500;
 			raycaster.setFromCamera(mouse, camera);
-			var intersection = raycaster.intersectObjects(actors);
+			var intersection = raycaster.intersectObjects(actors,true);
 
 			// TODO: add targeting logic
 			console.log("attempting trace");
@@ -609,11 +640,16 @@ function onDocumentMouseUp(event) {
 
 				if (mark != null)
 				{
+					
+					if (mark.object.isCollisionBox){
+						mark.object = mark.object.parent;
+					
+					}
+					
 					if (mark.object.isTagged) {
 						return;
 					}
-
-
+					
 					tagTarget = mark.object;
 					pause();
 				}
@@ -791,6 +827,19 @@ function render() {
 			updateShells();
 			updateCamera();
 		}
+		viewTimer += delta;
+		if (viewTimer > 0.5){
+			viewTimer =0;
+			var raycaster = new THREE.Raycaster();
+			raycaster.precision = 500;
+			raycaster.setFromCamera(new THREE.Vector2( .5, .5), camera);
+			var intersection = raycaster.intersectObjects(scene.children,true);
+			if (intersection.length>0){
+				var tag = intersection[0].point;
+				var tagObject = createViewTag(tag);
+				sendViewTag(tagObject);
+			}
+		}
 	}
 
 	renderer.render(scene, camera);
@@ -893,6 +942,27 @@ function createTag(tag) {
 	return tagObject;
 }
 
+function createViewTag(tag) {
+	var ix = tag.x;
+	var iy = tag.z;
+	var jx = camera.position.x;
+	var jy = camera.position.z;
+	var height = Math.sqrt(Math.pow(jx-ix,2)+Math.pow(jy-iy,2));
+	var width = height/Math.tan(camera.fov);
+	var tagObject =  {
+		tag: tag,
+		cameraLocation: camera.position.clone(),
+		targetLocation: tag.clone(),
+		rot:			camera.rotation.y,
+		fov:			camera.fov
+	};
+	//heatmapcontroller.addPoint(tagObject.cameraLocation,tagObject.targetLocation,tagObject.rot,tagObject.fov);
+	if (!imageSet){
+		imageSet = true;
+	}
+	return tagObject;
+}
+
 function manufactureButton(id, text) {
 	return "<button type='button' id='" + id + "' class='btn btn-primary'>" + text + "</button>";
 }
@@ -923,6 +993,7 @@ function bindUIFunctionality() {
 				$("#heatViewer").hide();
 			}
 			else {
+				heatmapcontroller.updateImage();
 				paused = true;
 				$("#heatView").text("Hide Heatmap");
 				$("#heatViewer").show();
