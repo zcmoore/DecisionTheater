@@ -78,6 +78,8 @@ var actorShells = [];
 var heatmapcontroller = new HeatMapController();
 var imageSet = false;
 
+var tagCategoryIndex, sphereMarker;
+
 
 /*
 Components of a shell:
@@ -187,8 +189,28 @@ function registerTag(tag) {
 		target: tagTarget,
 		tag: tag
 	};
+	console.log(tag.tagIndex);
+	sphereMarker.material.color.setHex(getTagColor(tag.tagIndex));
 
 	sendTag(tag);
+}
+
+function getTagColor(tagIndex) {
+    switch (tagIndex) {
+        case 0: {
+            return 0xFF0000;
+        }
+        case 1: {
+            return 0x00FF00;
+        }
+        case 2: {
+            return 0x0000FF;
+        }
+        case 3: {
+            return 0xFF00FF;
+        }
+
+    }
 }
 
 function pause() {
@@ -529,12 +551,40 @@ function waitForHeatmap(tags){
     }
 }
 function addTags(tags){
-	waitForHeatmap(tags);
+    waitForHeatmap(tags);
+
+    var tag;
+    var actor;
+
+    for (var x = 0; x < actors.length; x++) {
+        actor = actors[x];
+        for (var y = 0; y < tags.length; y++) {
+            tag = tags[y];
+            if (actor.id == tag.id) {
+                var sphere = createMarker(actor.scale);
+                sphere.material.color.setHex(getTagColor(tag.tagIndex));
+                actor.add(sphere);
+                sphere.position.y += 14 * (1 / actor.scale.x);
+            }
+        }
+    }
 }
 
 function addTag(tag){
 	heatmapcontroller.addPoint(tag.cameraLocation,tag.targetLocation,tag.rot,tag.fov);
 	heatmapcontroller.updateImage();
+
+	var actor;
+
+	for (var x = 0; x < actors.length; x++) {
+	    actor = actors[x];
+	    if (actor.id == tag.id) {
+	        var sphere = createMarker(actor.scale);
+	        sphere.material.color.setHex(getTagColor(tag.tagIndex));
+	        actor.add(sphere);
+	        sphere.position.y += 14 * (1 / actor.scale.x);
+	    }
+	}
 }
 
 function onWindowResize() {
@@ -615,10 +665,12 @@ function onDocumentMouseUp(event) {
 
 
 					tagTarget = mark.object;
-					var sphere = createMarker();
+					var scale = tagTarget.scale;
+					console.log(scale);
+					sphereMarker = createMarker(scale);
 
-					tagTarget.add(sphere);
-					sphere.position.y += 500;
+					tagTarget.add(sphereMarker);
+					sphereMarker.position.y += 14*(1/scale.x);
 					pause();
 				}
 			}
@@ -639,8 +691,9 @@ function onDocumentMouseUp(event) {
 	}
 }
 
-function createMarker() {
-	var geometry = new THREE.SphereGeometry(150,32,32);
+function createMarker(scale) {
+	
+	var geometry = new THREE.SphereGeometry((2.5*(1/scale.x)),32,32);
 	var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 	var sphere = new THREE.Mesh( geometry, material );
 
@@ -849,6 +902,8 @@ function createTagList() {
 							$(optionListIDs[i]).addClass("hidden");
 						}
 
+						tagCategoryIndex = targetElementID;
+
 						$(targetElementID).toggleClass("hidden");
 					}
 				})(categoryElementID);
@@ -877,14 +932,31 @@ function createTagList() {
 }
 
 function createTag(tag) {
+    console.log(tagCategoryIndex);
+    var tagIndex;
+    if (tagCategoryIndex == '#tagCategory0Options') {
+        tagIndex = 0;
+    }
+    if (tagCategoryIndex == '#tagCategory1Options') {
+        tagIndex = 1;
+    }
+    if (tagCategoryIndex == '#tagCategory2Options') {
+        tagIndex = 2;
+    }
+    if (tagCategoryIndex == '#tagCategory3Options') {
+        tagIndex = 3;
+    }
+
 	var ix = tagTarget.position.x;
 	var iy = tagTarget.position.z;
 	var jx = camera.position.x;
 	var jy = camera.position.z;
 	var height = Math.sqrt(Math.pow(jx-ix,2)+Math.pow(jy-iy,2));
 	var width = height/Math.tan(camera.fov);
-	var tagObject =  {
-		tag: tag,
+	var tagObject = {
+        id:tagTarget.id,
+        tag: tag,
+        tagIndex: tagIndex,
 		cameraLocation: camera.position.clone(),
 		targetLocation: tagTarget.position.clone(),
 		rot:			camera.rotation.y,
