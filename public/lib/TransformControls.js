@@ -762,12 +762,18 @@
 			if ( pointer.button === 0 || pointer.button === undefined ) {
 
 				var intersect = intersectObjects( pointer, scope.gizmo[_mode].pickers.children );
-
-				if ( intersect ) {
+				console.log(scope.gizmo[_mode].pickers.children);
+				if ( intersect || _mode == "rotate") {
 
 					scope.dispatchEvent( mouseDownEvent );
-
-					scope.axis = intersect.object.name;
+					
+					if (!(_mode=="rotate")){
+						scope.axis = intersect.object.name;
+					}
+					else{
+						scope.axis= scope.gizmo[_mode].pickers.children[1].name;
+					}
+					
 
 					scope.update();
 
