@@ -106,17 +106,19 @@ function onObjectCreate(objectData) {
 		lamp.serverID=objectData.id;
 		lamps[objectData.id]=lamp;
 		selectableObjects.push(lamp);
-		spotLight.position.set(objPos.pos_x+pos.x,objPos.pos_y+pos.y+10,objPos.pos_z+pos.z);
+		spotLight.position.set(0,8,0);
 		var lightTarget = new THREE.Object3D();
-		lightTarget.position.set(objPos.pos_x+pos.x,objPos.pos_y+pos.y-100,objPos.pos_z+pos.z);
-		spotLight.target = lightTarget;
-		scene.add(lightTarget);
+		//lightTarget.position.set(objPos.pos_x+pos.x,objPos.pos_y+pos.y-100,objPos.pos_z+pos.z);
+		lamp.add(lightTarget);
 		spotLight.castShadow = true;
 		spotLight.shadowCameraNear = 500;
 		spotLight.shadowCameraFar = 1000;
 		spotLight.shadowCameraFov = 80;
-		scene.add(spotLight);
+		lamp.add(spotLight);
+		spotLight.position.set(0,7,0);
+		spotLight.target = lightTarget;
 		lightList[objectData.id]=spotLight;
+		updateMaterials();
 	}
 	);
 }
@@ -165,6 +167,19 @@ function turnNightOff(){
 	for (i = 0; i < lightList.length; i++) {
 		lightList[i].intensity = 0.0;
 	}
+}
+
+function updateMaterials() {
+    scene.traverse( function ( node ) {
+        if ( node.material ) {
+            node.material.needsUpdate = true;
+            if ( node.material instanceof THREE.MeshFaceMaterial ) {
+                for ( var i = 0; i < node.material.materials.length; i ++ ) {
+                    node.material.materials[ i ].needsUpdate = true;
+                }
+            }
+        }
+    } );
 }
 
 function changeNightMode(bool){
@@ -267,7 +282,7 @@ function removeObjectByID(id){
 		addablePlaces.push(mesh);
 		scene.remove(lamps[id]);
 		delete lamps[id];
-		scene.remove(lightList[id]);
+		//scene.remove(lightList[id]);
 		delete lightList[id];
 	}
 }
@@ -282,7 +297,7 @@ function deleteObjectByID(id){
 		}
 		scene.remove(lamps[id]);
 		delete lamps[id];
-		scene.remove(lightList[id]);
+		//scene.remove(lightList[id]);
 		delete lightList[id];
 	}
 }
@@ -509,6 +524,7 @@ function fillScene() {
 				var material = new THREE.MeshFaceMaterial( materials );
 				city = new THREE.Mesh( geometry, material );
 				scene.add( city );
+				city.position.set(0,4,0);
 				cityLoader.onLoadComplete=function(){};
 				$("#loadNotification").remove();
 				
@@ -519,6 +535,7 @@ function fillScene() {
 		function ( geometry, materials ) {
 			var material = new THREE.MeshFaceMaterial( materials );
 			city = new THREE.Mesh( geometry, material );
+			city.position.set(0,4,0);
 			scene.add( city );
 	});
 	loader.load(

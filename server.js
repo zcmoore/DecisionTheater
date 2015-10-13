@@ -37,7 +37,7 @@ io.sockets.on('connection', function(socket) {
   if (socket.handshake.query.appid == '1'){
 	if(!sessions[sessionid]){
 		sessions[sessionid] = new Session();
-	};
+	}
 	cityServer.setupSocket(io,socket,sessions[sessionid]);
   }
   else if (socket.handshake.query.appid == '2') {

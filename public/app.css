@@ -125,3 +125,12 @@ nav #objectlist{overflow:hidden; overflow-y:scroll;}
 	background-color: #00000000;
 	z-index: 2;
 }
+
+.isSmall{
+	overflow-y: auto; 
+	height:400px;
+}
+
+.isXS{
+	width: 100%;
+}

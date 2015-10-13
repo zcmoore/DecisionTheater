@@ -78,6 +78,9 @@ var actorShells = [];
 var heatmapcontroller = new HeatMapController();
 var imageSet = false;
 
+var viewTimer = 0;
+var tagCategoryIndex, sphereMarker;
+
 
 /*
 Components of a shell:
@@ -187,8 +190,28 @@ function registerTag(tag) {
 		target: tagTarget,
 		tag: tag
 	};
+	console.log(tag.tagIndex);
+	sphereMarker.material.color.setHex(getTagColor(tag.tagIndex));
 
 	sendTag(tag);
+}
+
+function getTagColor(tagIndex) {
+    switch (tagIndex) {
+        case 0: {
+            return 0xFF0000;
+        }
+        case 1: {
+            return 0x00FF00;
+        }
+        case 2: {
+            return 0x0000FF;
+        }
+        case 3: {
+            return 0xFF00FF;
+        }
+
+    }
 }
 
 function pause() {
@@ -247,6 +270,14 @@ function generateActors() {
 
 			actors.push(actor);
 			scene.add(actor);
+			var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+			var material = new THREE.MeshBasicMaterial( {color: 0x00ff00,transparent:true,opacity:0} );
+			var cube = new THREE.Mesh( geometry, material );
+			actor.add( cube );
+			cube.isCollisionBox = true;
+			cube.scale.y=peopleScale;
+			cube.parent = actor;
+			actor.collisionBox = cube;
 
 			animations.push(new THREE.Animation(actor, actor.geometry.animations[0]));
 			animations[animCounter].play();
@@ -298,9 +329,9 @@ function populateCity() {
 			scene.add(city);
 			var bbh = new THREE.BoundingBoxHelper(city,0xff0000);
 			geometry.computeBoundingBox();
-			var bounds = geometry.boundingBox;
-			heatmapcontroller.createHeatMap("public/HeatMap/models/Scene/Quadrant1.jpg",
-										bounds.min.x,bounds.max.z,
+			var bounds = geometry.boundingBox;			
+			heatmapcontroller.createHeatMap("public/models/HeatMap/Models/Scene/HeatmapQuadrant.jpg",
+										bounds.min.x,bounds.max.x,
 										bounds.min.z,bounds.max.z,
 										document.getElementById("heatViewer"));
 	});
@@ -524,17 +555,67 @@ function waitForHeatmap(tags){
     }
     else{
         setTimeout(
+            waitForHeatmap 
+        ,1000,tags);
+    }
+}
+function waitForHeatmapView(tags){
+    if(typeof heatmapcontroller.heatmap !== "undefined"){
+		for (i =0; i <tags.length; i++){
+			var tag = tags[i];
+			heatmapcontroller.addViewPoint(tag.cameraLocation,tag.targetLocation,tag.rot,tag.fov);
+		}
+		heatmapcontroller.updateImage();
+    }
+    else{
+        setTimeout(
             waitForHeatmap
         ,1000,tags);
     }
 }
 function addTags(tags){
-	waitForHeatmap(tags);
+    waitForHeatmap(tags);
+
+    var tag;
+    var actor;
+
+    for (var x = 0; x < actors.length; x++) {
+        actor = actors[x];
+        for (var y = 0; y < tags.length; y++) {
+            tag = tags[y];
+            if (actor.id == tag.id) {
+                var sphere = createMarker(actor.scale);
+                sphere.material.color.setHex(getTagColor(tag.tagIndex));
+                actor.add(sphere);
+                sphere.position.y += 14 * (1 / actor.scale.x);
+            }
+        }
+    }
+}
+
+function addViewTags(viewTags){
+	waitForHeatmapView(viewTags);
 }
 
 function addTag(tag){
 	heatmapcontroller.addPoint(tag.cameraLocation,tag.targetLocation,tag.rot,tag.fov);
+	var actor;
+
+	for (var x = 0; x < actors.length; x++) {
+	    actor = actors[x];
+	    if (actor.id == tag.id) {
+	        var sphere = createMarker(actor.scale);
+	        sphere.material.color.setHex(getTagColor(tag.tagIndex));
+	        actor.add(sphere);
+	        sphere.position.y += 14 * (1 / actor.scale.x);
+	    }
+	}
+}
+
+function addViewTag(viewTag){
+	heatmapcontroller.addViewPoint(viewTag.cameraLocation,viewTag.targetLocation,viewTag.rot,viewTag.fov);
 	heatmapcontroller.updateImage();
+
 }
 
 function onWindowResize() {
@@ -591,7 +672,7 @@ function onDocumentMouseUp(event) {
 			var raycaster = new THREE.Raycaster();
 			raycaster.precision = 500;
 			raycaster.setFromCamera(mouse, camera);
-			var intersection = raycaster.intersectObjects(actors);
+			var intersection = raycaster.intersectObjects(actors,true);
 
 			// TODO: add targeting logic
 			console.log("attempting trace");
@@ -609,34 +690,46 @@ function onDocumentMouseUp(event) {
 
 				if (mark != null)
 				{
+					
+					if (mark.object.isCollisionBox){
+						mark.object = mark.object.parent;
+					
+					}
+					
 					if (mark.object.isTagged) {
 						return;
 					}
-
-
+					
 					tagTarget = mark.object;
+					var scale = tagTarget.scale;
+					console.log(scale);
+					sphereMarker = createMarker(scale);
+
+					tagTarget.add(sphereMarker);
+					sphereMarker.position.y += 14*(1/scale.x);
 					pause();
 				}
 			}
 
 			/*if (intersection.length > 0) {
-				var sphere = createMarker();
+			    var sphere = createMarker();
 
-				sphere.position.x = mark.point.x;
-				sphere.position.y = mark.point.y;
-				sphere.position.z = mark.point.z;
+			    sphere.position.x = mark.point.x;
+			    sphere.position.y = mark.point.y;
+			    sphere.position.z = mark.point.z;
 
-				console.log(parseFloat(mark.point.x).toFixed(2) + " "
+			    console.log(parseFloat(mark.point.x).toFixed(2) + " "
 									+ parseFloat(mark.point.y).toFixed(2) + " "
 									+ parseFloat(mark.point.z).toFixed(2));
-				scene.add( sphere );
+			    scene.add(sphere);
 			}*/
 		}
 	}
 }
 
-function createMarker() {
-	var geometry = new THREE.SphereGeometry(5);
+function createMarker(scale) {
+	
+	var geometry = new THREE.SphereGeometry((2.5*(1/scale.x)),32,32);
 	var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 	var sphere = new THREE.Mesh( geometry, material );
 
@@ -736,7 +829,7 @@ function setSpeed() {
 function fillScene() {
 	// SCENE
 	scene = new THREE.Scene();
-	scene.fog = new THREE.Fog(0x808080, 3000, 6000);
+	scene.fog = new THREE.Fog(0x808080, 5000, 8000);
 	// LIGHTS
 	ambientLight = new THREE.AmbientLight(0x030303);
 	light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
@@ -790,6 +883,19 @@ function render() {
 			moveActors(delta);
 			updateShells();
 			updateCamera();
+		}
+		viewTimer += delta;
+		if (viewTimer > 2){
+			viewTimer =0;
+			var raycaster = new THREE.Raycaster();
+			raycaster.precision = 500;
+			raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+			var intersection = raycaster.intersectObjects(scene.children,true);
+			if (intersection.length>0){
+				var tag = intersection[0].point;
+				var tagObject = createViewTag(tag);
+				sendViewTag(tagObject);
+			}
 		}
 	}
 
@@ -845,6 +951,8 @@ function createTagList() {
 							$(optionListIDs[i]).addClass("hidden");
 						}
 
+						tagCategoryIndex = targetElementID;
+
 						$(targetElementID).toggleClass("hidden");
 					}
 				})(categoryElementID);
@@ -873,8 +981,46 @@ function createTagList() {
 }
 
 function createTag(tag) {
+    console.log(tagCategoryIndex);
+    var tagIndex;
+    if (tagCategoryIndex == '#tagCategory0Options') {
+        tagIndex = 0;
+    }
+    if (tagCategoryIndex == '#tagCategory1Options') {
+        tagIndex = 1;
+    }
+    if (tagCategoryIndex == '#tagCategory2Options') {
+        tagIndex = 2;
+    }
+    if (tagCategoryIndex == '#tagCategory3Options') {
+        tagIndex = 3;
+    }
+
 	var ix = tagTarget.position.x;
 	var iy = tagTarget.position.z;
+	var jx = camera.position.x;
+	var jy = camera.position.z;
+	var height = Math.sqrt(Math.pow(jx-ix,2)+Math.pow(jy-iy,2));
+	var width = height/Math.tan(camera.fov);
+	var tagObject = {
+        id:tagTarget.id,
+        tag: tag,
+        tagIndex: tagIndex,
+		cameraLocation: camera.position.clone(),
+		targetLocation: tagTarget.position.clone(),
+		rot:			camera.rotation.y,
+		fov:			camera.fov
+	};
+	//heatmapcontroller.addPoint(tagObject.cameraLocation,tagObject.targetLocation,tagObject.rot,tagObject.fov);
+	if (!imageSet){
+		imageSet = true;
+	}
+	return tagObject;
+}
+
+function createViewTag(tag) {
+	var ix = tag.x;
+	var iy = tag.z;
 	var jx = camera.position.x;
 	var jy = camera.position.z;
 	var height = Math.sqrt(Math.pow(jx-ix,2)+Math.pow(jy-iy,2));
@@ -882,7 +1028,7 @@ function createTag(tag) {
 	var tagObject =  {
 		tag: tag,
 		cameraLocation: camera.position.clone(),
-		targetLocation: tagTarget.position.clone(),
+		targetLocation: tag.clone(),
 		rot:			camera.rotation.y,
 		fov:			camera.fov
 	};
@@ -923,6 +1069,7 @@ function bindUIFunctionality() {
 				$("#heatViewer").hide();
 			}
 			else {
+				heatmapcontroller.updateImage();
 				paused = true;
 				$("#heatView").text("Hide Heatmap");
 				$("#heatViewer").show();
