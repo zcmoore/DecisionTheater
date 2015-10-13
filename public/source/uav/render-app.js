@@ -546,33 +546,21 @@ function onObjectCreate(objectData) {}
 function onObjectListCreate(objectList) {}
 
 function waitForHeatmap(tags){
-    if(typeof heatmapcontroller.heatmap !== "undefined"){
-		for (i =0; i <tags.length; i++){
-			var tag = tags[i];
-			heatmapcontroller.addPoint(tag.cameraLocation,tag.targetLocation,tag.rot,tag.fov);
-		}
-		heatmapcontroller.updateImage();
-    }
-    else{
-        setTimeout(
-            waitForHeatmap 
-        ,1000,tags);
-    }
+	for (i =0; i <tags.length; i++){
+		var tag = tags[i];
+		heatmapcontroller.addPoint(tag.cameraLocation,tag.targetLocation,tag.rot,tag.fov);
+	}
+	heatmapcontroller.updateImage();
 }
+
 function waitForHeatmapView(tags){
-    if(typeof heatmapcontroller.heatmap !== "undefined"){
-		for (i =0; i <tags.length; i++){
-			var tag = tags[i];
-			heatmapcontroller.addViewPoint(tag.cameraLocation,tag.targetLocation,tag.rot,tag.fov);
-		}
-		heatmapcontroller.updateImage();
-    }
-    else{
-        setTimeout(
-            waitForHeatmap
-        ,1000,tags);
-    }
+	for (i =0; i <tags.length; i++){
+		var tag = tags[i];
+		heatmapcontroller.addViewPoint(tag.cameraLocation,tag.targetLocation,tag.rot,tag.fov);
+	}
+	heatmapcontroller.updateImage();
 }
+
 function addTags(tags){
     waitForHeatmap(tags);
 
