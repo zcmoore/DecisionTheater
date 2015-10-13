@@ -77,8 +77,15 @@ HeatMapController.prototype.addViewPoint = function(cameraLocation,targetLocatio
 	var iy = cameraLocation.z;
 	var tx = targetLocation.x;
 	var ty = targetLocation.z;
+	console.log(this.imgWidth);
+	console.log(tx);
+	console.log(this.lx);
+	console.log(this.hx);
+	console.log("then xy");
 	var x = Math.floor(this.imgWidth*(tx-this.lx)/(this.hx-this.lx));
+	console.log(x);
 	var y = Math.floor(this.imgHeight*(ty-this.ly)/(this.hy-this.ly));
+	console.log(y);
 	var scaledx = Math.floor(this.imgWidth*(tx-this.lx)/(this.hx-this.lx));
 	var scaledy = Math.floor(this.imgHeight*(ty-this.ly)/(this.hy-this.ly));
 	var height = Math.floor(Math.sqrt(Math.pow(scaledx-x,2)+Math.pow(scaledy-y,2)));

@@ -329,9 +329,9 @@ function populateCity() {
 			scene.add(city);
 			var bbh = new THREE.BoundingBoxHelper(city,0xff0000);
 			geometry.computeBoundingBox();
-			var bounds = geometry.boundingBox;
-			heatmapcontroller.createHeatMap("public/HeatMap/models/Scene/Quadrant1.jpg",
-										bounds.min.x,bounds.max.z,
+			var bounds = geometry.boundingBox;			
+			heatmapcontroller.createHeatMap("public/models/HeatMap/Models/Scene/HeatmapQuadrant.jpg",
+										bounds.min.x,bounds.max.x,
 										bounds.min.z,bounds.max.z,
 										document.getElementById("heatViewer"));
 	});
@@ -829,7 +829,7 @@ function setSpeed() {
 function fillScene() {
 	// SCENE
 	scene = new THREE.Scene();
-	scene.fog = new THREE.Fog(0x808080, 3000, 6000);
+	scene.fog = new THREE.Fog(0x808080, 5000, 8000);
 	// LIGHTS
 	ambientLight = new THREE.AmbientLight(0x030303);
 	light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
@@ -885,11 +885,11 @@ function render() {
 			updateCamera();
 		}
 		viewTimer += delta;
-		if (viewTimer > 0.5){
+		if (viewTimer > 2){
 			viewTimer =0;
 			var raycaster = new THREE.Raycaster();
 			raycaster.precision = 500;
-			raycaster.setFromCamera(new THREE.Vector2( .5, .5), camera);
+			raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
 			var intersection = raycaster.intersectObjects(scene.children,true);
 			if (intersection.length>0){
 				var tag = intersection[0].point;
