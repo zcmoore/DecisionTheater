@@ -180,6 +180,10 @@ function sendTag(tag) {
 	socket.emit('addTag', tag);
 }
 
+function requestTag() {
+	socket.emit('requestTags');
+}
+
 function sendViewTag(tag) {
 	socket.emit('addViewTag', tag);
 }

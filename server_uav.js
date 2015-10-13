@@ -90,7 +90,6 @@ module.exports = {
 			socket.emit('requestObjects', uavsession.objectList);
 			uavsession.emitToSockets('requestCamera');
 			socket.emit('nightMode', uavsession.nightMode);
-			socket.emit('requestTags', uavsession.tags, uavsession.viewTags);
 			uavsession.emitToSocketsNotActive('serverNotification', wrapUsername(username) + ' has joined.');
 		}
 	});
@@ -125,7 +124,7 @@ module.exports = {
 	});
 	
 	socket.on('requestTags', function(){
-	
+		socket.emit('requestTags', uavsession.tags, uavsession.viewTags);
 	});
 
 	socket.on('objectCreated', function(objectData) {
