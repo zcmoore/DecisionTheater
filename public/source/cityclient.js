@@ -120,6 +120,10 @@ function sendObjectCreation(object){
   socket.emit('objectCreated',object);
 }
 
+function sendFillScene(positionArray){
+  socket.emit('fillScene',positionArray);
+}
+
 function sendRemovalNotice(id){
   socket.emit('removeid',id);
 }

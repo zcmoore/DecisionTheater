@@ -91,6 +91,34 @@ module.exports = {
     }
   });
   
+  socket.on('fillScene', function(positionArray){
+    if (socket.username === citysession.activeUserName)
+    {
+	  console.log("The length is  " + positionArray.length);
+	  var objectArray = [];
+	  for (j = 0; j < positionArray.length;j++){
+		  var objectData = {
+				id: "-1",
+				pos_x: positionArray[j].x,
+				pos_y: positionArray[j].y,
+				pos_z: positionArray[j].z,
+				rot_x: 0,
+				rot_y: 0,
+				rot_z: 0
+			};
+		  console.log("The current position is " + j);
+		  createObject(objectData,j);
+		  objectArray.push(objectData);
+	  }
+	  
+	  for (j = 0; j < objectArray.length;j++){
+		  citysession.emitToSockets('objectCreated', objectArray[j]);
+		  var positonString = objectArray[j].pos_x.toFixed(2) + ', ' + objectArray[j].pos_y.toFixed(2) + ', ' + objectArray[j].pos_z.toFixed(2);
+		  citysession.emitToSockets('serverNotification', 'Object created at (' + positonString + ')');
+	  }
+    }
+  });
+  
   socket.on('deleteid', function(id){
     if (socket.username === citysession.activeUserName)
     {
@@ -183,6 +211,13 @@ function createObject(objectData) {
 		objectData.id = date.getTime();
 		citysession.objectList[objectData.id] = objectData;
 };
+
+function createObject(objectData,increment) {
+		var date = new Date();
+		objectData.id = date.getTime() + increment;
+		citysession.objectList[objectData.id] = objectData;
+};
+
 function deleteObject(objectID) {
 		if (objectID in citysession.objectList) {
 			delete citysession.objectList[objectID];

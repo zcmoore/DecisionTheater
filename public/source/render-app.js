@@ -145,6 +145,7 @@ function onWindowResize() {
 function updateNightMode(bool){
 	if (bool == true){
 		turnNightOn();
+		updateMaterials();
 	}
 	else {
 		turnNightOff();
@@ -155,8 +156,9 @@ function turnNightOn(){
 	light.intensity = 0.0;
 	light2.intensity = 0.0;
 	nightMode = true;
-	for (i = 0; i < lightList.length; i++) {
-		lightList[i].intensity = 0.8;
+	for (var p in lightList) {
+		var spotlight = lightList[p];
+		spotlight.intensity = 0.8;
 	}
 }
 
@@ -164,8 +166,9 @@ function turnNightOff(){
 	light.intensity = 1.0;
 	light2.intensity = 1.0;
 	nightMode = false;
-	for (i = 0; i < lightList.length; i++) {
-		lightList[i].intensity = 0.0;
+	for (var p in lightList) {
+		var spotlight = lightList[p];
+		spotlight.intensity = 0.0;
 	}
 }
 
@@ -184,6 +187,7 @@ function updateMaterials() {
 
 function changeNightMode(bool){
 	if (hasControl){
+		console.log(lightList);
 		if (bool == false && nightMode == true){ //night is off
 			turnNightOff();
 			sendUpdateLightMode(bool);
@@ -619,6 +623,11 @@ function bindUIFunctionality(){
 		});
 		$("#AddAny").click(function(){
 			switchModes(Modes.ADDANY);
+		});
+		$("#FillScene").click(function(){
+			if (lightPlaces.length != 0){
+				sendFillScene(lightPlaces);
+			}
 		});
 		$("#lampbtn").click(function(){
 			showAddablePlaces();
