@@ -58,7 +58,7 @@ var carPaths = [];
 var nextWaypointIndex = 0;
 var civilianModelPaths = [
 	'public/models/HeatMap/Models/People/Arab/Men/man.js',
-	
+
 ];
 var goodGuyModelPaths = [
 	'public/models/HeatMap/Models/People/Soldier/soldier.js'
@@ -176,8 +176,8 @@ function receiveShells(shells) {
 		actor.movementType = shell.movementType;
 		actor.modelIndex = shell.modelIndex;
 		actor.modelType = shell.modelType;
-		
-		
+
+
 	}
 }
 
@@ -329,7 +329,7 @@ function populateCity() {
 			scene.add(city);
 			var bbh = new THREE.BoundingBoxHelper(city,0xff0000);
 			geometry.computeBoundingBox();
-			var bounds = geometry.boundingBox;			
+			var bounds = geometry.boundingBox;
 			heatmapcontroller.createHeatMap("public/models/HeatMap/Models/Scene/HeatmapQuadrant.jpg",
 										bounds.min.x,bounds.max.x,
 										bounds.min.z,bounds.max.z,
@@ -678,16 +678,16 @@ function onDocumentMouseUp(event) {
 
 				if (mark != null)
 				{
-					
+
 					if (mark.object.isCollisionBox){
 						mark.object = mark.object.parent;
-					
+
 					}
-					
+
 					if (mark.object.isTagged) {
 						return;
 					}
-					
+
 					tagTarget = mark.object;
 					var scale = tagTarget.scale;
 					console.log(scale);
@@ -716,7 +716,7 @@ function onDocumentMouseUp(event) {
 }
 
 function createMarker(scale) {
-	
+
 	var geometry = new THREE.SphereGeometry((2.5*(1/scale.x)),32,32);
 	var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 	var sphere = new THREE.Mesh( geometry, material );
@@ -1062,7 +1062,13 @@ function bindUIFunctionality() {
 				$("#heatView").text("Hide Heatmap");
 				$("#heatViewer").show();
 			}
-			
+
+		});
+		$("#zoomin").click(function() {
+			cameraControls.zoomOut();
+		});
+		$("#zoomout").click(function() {
+			cameraControls.zoomIn();
 		});
 		$("#menuclass").mouseover(function() {
 			inUI = true;
