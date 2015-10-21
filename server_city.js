@@ -18,7 +18,7 @@ var Session = require('./Session.js');
 var citysession;
 
 function grantControl(socket) {
-  activeUserName = socket.username;
+  citysession.activeUserName = socket.username;
   citysession.emitToSockets('controlgrant', socket.username);
   citysession.emitToSockets('serverNotification', 'Control given to ' + wrapUsername(socket.username));
   userListChanged();
@@ -170,6 +170,8 @@ module.exports = {
   });
 
   socket.on('cameraUpdate', function(cameraData) {
+    console.log(socket.username);
+	console.log(citysession.activeUserName);
     if (socket.username === citysession.activeUserName) {
       citysession.emitToSocketsNotActive('cameraUpdate', cameraData);
       var currentTime = new Date().getTime();
@@ -201,6 +203,7 @@ module.exports = {
     citysession.emitToSockets('serverNotification', wrapUsername(socket.username) + ' has left.');
     grantControl({username: citysession.userQueue[0]});
     userListChanged();
+	
   });
 	}
 };
