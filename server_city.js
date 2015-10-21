@@ -57,7 +57,6 @@ module.exports = {
       socket.username = username;
 	  citysession.sockets.push(socket);
       citysession.usernames[username] = username;
-		console.log(citysession.usernames + "  user names");
       if (Object.keys(citysession.usernames).length == 1) {
         citysession.activeUserName = username;
         grantControl(socket);
@@ -94,7 +93,6 @@ module.exports = {
   socket.on('fillScene', function(positionArray){
     if (socket.username === citysession.activeUserName)
     {
-	  console.log("The length is  " + positionArray.length);
 	  var objectArray = [];
 	  for (j = 0; j < positionArray.length;j++){
 		  var objectData = {
@@ -106,7 +104,6 @@ module.exports = {
 				rot_y: 0,
 				rot_z: 0
 			};
-		  console.log("The current position is " + j);
 		  createObject(objectData,j);
 		  objectArray.push(objectData);
 	  }
@@ -170,8 +167,6 @@ module.exports = {
   });
 
   socket.on('cameraUpdate', function(cameraData) {
-    console.log(socket.username);
-	console.log(citysession.activeUserName);
     if (socket.username === citysession.activeUserName) {
       citysession.emitToSockets('cameraUpdate', cameraData);
       var currentTime = new Date().getTime();
