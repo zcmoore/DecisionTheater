@@ -43,6 +43,7 @@ function connectToServer() {
 
   socket.on('controlgrant', function(username) {
     hasControl = (name === username);
+	console.log(hasControl);
 	if (!hasControl){
 		$("#menudiv").collapse("hide");
 	}
@@ -52,6 +53,7 @@ function connectToServer() {
   });
 
   socket.on('cameraUpdate', function(data) {
+    console.log("should be updating");
     onCameraUpdate(data);
   });
 
@@ -114,6 +116,7 @@ function requestName() {
 
 function sendUpdatedCameraInformation(cameraData) {
   socket.emit('cameraUpdate', cameraData);
+  console.log("should be sending");
 }
 
 function sendObjectCreation(object){

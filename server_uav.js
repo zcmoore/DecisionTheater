@@ -37,7 +37,7 @@ function UavSession(){
 UavSession.prototype = new Session();
 
 function grantControl(socket) {
-  activeUserName = socket.username;
+  uavsession.activeUserName = socket.username;
   uavsession.emitToSockets('controlgrant', socket.username);
   uavsession.emitToSockets('serverNotification', 'Control given to ' + wrapUsername(socket.username));
   userListChanged();
